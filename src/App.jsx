@@ -16,6 +16,7 @@ import {
     Power,
     CornerUpLeft,
     Grid3X3,
+    Grid2X2,
     Activity,
     Mic,
     HardDrive,
@@ -110,6 +111,7 @@ export default function CameraPortfolio() {
     // 0: Standard, 1: Grids/Safe, 2: Clean, 3: Status Dashboard
     const [osdMode, setOsdMode] = useState(0);
     const [galleryFocusIndex, setGalleryFocusIndex] = useState(0);
+    const [gridMode, setGridMode] = useState(2); // 2 for 2x2, 3 for 3x3
 
     // Clock Effect
     useEffect(() => {
@@ -180,13 +182,21 @@ export default function CameraPortfolio() {
         }
     };
 
+    const toggleGridMode = () => {
+        setGridMode(prev => prev === 2 ? 3 : 2);
+    };
+
     // D-Pad Navigation Logic
     const handleDirection = (dir) => {
         if (view === 'gallery') {
+            const cols = gridMode;
+            const capacity = gridMode * gridMode;
+            const totalItems = Math.min(FILMS.length, capacity); // Constrain focus to visible items if strictly paginated, or just FILMS length
+
             if (dir === 'left') setGalleryFocusIndex(prev => Math.max(0, prev - 1));
             if (dir === 'right') setGalleryFocusIndex(prev => Math.min(FILMS.length - 1, prev + 1));
-            if (dir === 'down') setGalleryFocusIndex(prev => Math.min(FILMS.length - 1, prev + 2)); // Grid jump
-            if (dir === 'up') setGalleryFocusIndex(prev => Math.max(0, prev - 2)); // Grid jump
+            if (dir === 'down') setGalleryFocusIndex(prev => Math.min(FILMS.length - 1, prev + cols));
+            if (dir === 'up') setGalleryFocusIndex(prev => Math.max(0, prev - cols));
         }
     };
 
@@ -310,15 +320,20 @@ export default function CameraPortfolio() {
                             )}
 
                             {/* Main Content: Dynamic Video Feed Container */}
-                            <div className={`absolute transition-all duration-500 ease-in-out bg-cover bg-center border-zinc-800
-                   ${view !== 'viewfinder'
-                                ? 'blur-md scale-105 brightness-[0.25] inset-0'
-                                : osdMode === 3
-                                    ? 'top-8 left-8 w-[35%] aspect-video border border-white/20 shadow-2xl z-10'
-                                    : 'inset-0 scale-100 border-0'
-                            }`}
-                                 style={{ backgroundImage: "url('https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=2071&auto=format&fit=crop')" }}>
-                            </div>
+                            <video
+                                className={`absolute transition-all duration-500 ease-in-out object-cover border-zinc-800
+                       ${view !== 'viewfinder'
+                                    ? 'blur-md scale-105 brightness-[0.25] inset-0 w-full h-full'
+                                    : osdMode === 3
+                                        ? 'top-8 left-8 w-[35%] aspect-video border border-white/20 shadow-2xl z-10 rounded-sm'
+                                        : 'inset-0 scale-100 border-0 w-full h-full'
+                                }`}
+                                src="previews/videoTest.mp4"
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                            />
 
                             {/* Screen Effects (Only on full screen mode) */}
                             {osdMode !== 3 && (
@@ -506,13 +521,19 @@ export default function CameraPortfolio() {
                                     <div className={`absolute inset-0 p-6 md:p-10 overflow-y-auto transition-all duration-300 ${view === 'gallery' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
                                         <div className="flex items-center justify-between mb-6 border-b border-white/20 pb-4">
                                             <h2 className="text-white font-camera text-2xl tracking-widest text-shadow-sm">PLAYBACK</h2>
-                                            <span className="text-green-500 font-mono text-xs">USE ARROWS + OK</span>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-green-500 font-mono text-xs">USE ARROWS + OK</span>
+                                                <button onClick={toggleGridMode} className="text-white/50 hover:text-white transition-colors">
+                                                    {gridMode === 2 ? <Grid2X2 size={20} /> : <Grid3X3 size={20} />}
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                                        {/* Dynamic Grid Layout */}
+                                        <div className={`grid gap-4 ${gridMode === 3 ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
                                             {FILMS.map((film, index) => (
                                                 <button key={film.id} onClick={() => selectFilm(film)}
-                                                        className={`group relative h-32 w-full rounded border hover:border-green-400 bg-zinc-900/80 text-left transition-all hover:scale-[1.02] overflow-hidden ${galleryFocusIndex === index ? 'border-green-400 ring-2 ring-green-500/50 scale-[1.02]' : 'border-white/10'}`}>
-                                                    {/* Placeholder image from JSON/Constant */}
+                                                        className={`group relative aspect-video w-full rounded border hover:border-green-400 bg-zinc-900/80 text-left transition-all hover:scale-[1.02] overflow-hidden ${galleryFocusIndex === index ? 'border-green-400 ring-2 ring-green-500/50 scale-[1.02]' : 'border-white/10'}`}>
                                                     <div className="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-80 transition-opacity" style={{backgroundImage: `url(${film.src})`}}></div>
                                                     <div className={`absolute inset-0 bg-gradient-to-br ${film.color} opacity-40 mix-blend-multiply`}></div>
 
@@ -527,6 +548,13 @@ export default function CameraPortfolio() {
                                                         </div>
                                                     </div>
                                                 </button>
+                                            ))}
+                                            {/* Empty Slots */}
+                                            {Array.from({ length: Math.max(0, (gridMode * gridMode) - FILMS.length) }).map((_, i) => (
+                                                <div key={`empty-${i}`} className="aspect-video w-full rounded border border-white/5 bg-zinc-900/30 flex items-center justify-center flex-col gap-2">
+                                                    <span className="text-white/10 font-bold tracking-widest text-xs font-mono">NO MEDIA</span>
+                                                    <div className="w-8 h-[1px] bg-white/5"></div>
+                                                </div>
                                             ))}
                                         </div>
                                     </div>
