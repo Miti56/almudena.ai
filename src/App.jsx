@@ -14,46 +14,76 @@ import {
     User,
     Settings,
     Power,
-    CornerUpLeft
+    CornerUpLeft,
+    Grid3X3,
+    Activity,
+    Mic,
+    HardDrive,
+    Clock,
+    Clapperboard
 } from 'lucide-react';
 
-// --- Mock Data ---
+// --- Film Data (Based on your JSON structure) ---
 const FILMS = [
     {
         id: 1,
-        title: "NEON NIGHTS",
-        role: "Director of Photography",
-        year: "2024",
-        tech: "Arri Alexa Mini LF",
-        desc: "A cyberpunk noir short film exploring the relationship between AI and human memory in a decaying metropolis.",
-        color: "from-purple-900 to-fuchsia-900"
+        src: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2525&auto=format&fit=crop",
+        title: "ALAS DE PAPEL",
+        description: "Martina, una niña con mucha imaginación, vive sus primeras Navidades sabiendo que Papá Noel no existe, rodeada de una familia caótica y amorosa con la que se siente incomprendida.",
+        description2: "Este cortometraje es un retrato intergeneracional que pone el foco en los cuidados, y en el autocuidado. Formalmente, se explora el sostenimiento de los planos como herramienta para construir una atmósfera densa y pausada, que insinue un espacio limbo, casi onírico.",
+        director: "Almudena Mirones Riotte",
+        actor: "John Smith",
+        year: "2025",
+        runtime: "8m",
+        res: "4K HEVC",
+        size: "14.2 GB",
+        role: "Director of Photography", // Added default role for UI
+        color: "from-purple-900 to-indigo-900"
     },
     {
         id: 2,
-        title: "SILENT ECHO",
+        src: "https://images.unsplash.com/photo-1505673598505-51722bc28c1d?q=80&w=2070&auto=format&fit=crop",
+        title: "CUÍDALAS",
+        description: "Rosario(75) se siente frustrada por estar perdiendo su autonomía, y con ello su utilidad en la familia. Rosita(7) se siente dejada de lado. Y Rosa(40) no da a basto entre los cuidados de su madre, su hija y las llamadas telefónicas constantes.",
+        description2: "Este cortometraje es un retrato intergeneracional que pone el foco en los cuidados, y en el autocuidado. Formalmente, se explora el sostenimiento de los planos como herramienta para construir una atmósfera densa y pausada, que insinue un espacio limbo, casi onírico.",
+        director: "Almudena Mirones Riotte",
+        actor: "Anna Williams",
+        year: "2024",
+        runtime: "7m",
+        res: "1080p RAW",
+        size: "8.4 GB",
         role: "Cinematographer",
-        year: "2023",
-        tech: "Red Komodo / Cooke S4",
-        desc: "An atmospheric horror piece shot entirely in natural light within the deep forests of the Pacific Northwest.",
         color: "from-emerald-900 to-teal-900"
     },
     {
         id: 3,
-        title: "URBAN RHYTHM",
-        role: "Editor / Colorist",
-        year: "2023",
-        tech: "DaVinci Resolve",
-        desc: "A fast-paced documentary highlighting the underground breakdancing culture in Seoul.",
-        color: "from-orange-900 to-red-900"
+        src: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070&auto=format&fit=crop",
+        title: "UN CRI DANS LE VIDE",
+        description: "Dos compañeros de piso y amigos, atraviesan las distintas fases del duelo tras el suicidio de uno de sus mejores amigos.",
+        description2: "Este cortometraje explora una estructura capitular (negación - ira - negociación - depresión - aceptación) así como saltos bruscos de sonido, imagen o conversaciones, para tratar de recrear la angustia, la confusión y el caos vividos en estas situaciones.",
+        director: "Almudena Mirones Riotte",
+        actor: "N/A",
+        year: "2022",
+        runtime: "6m",
+        res: "1080p MP4",
+        size: "1.1 GB",
+        role: "DOP / Editor",
+        color: "from-blue-900 to-slate-900"
     },
     {
         id: 4,
-        title: "THE VOID",
+        src: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=2074&auto=format&fit=crop",
+        title: "TAMAHINE ITI",
+        description: "Experimental visual journey through the memories of childhood.",
+        description2: "Shot entirely on location using natural light to evoke a sense of nostalgia and lost time.",
+        director: "Almudena Mirones Riotte",
+        actor: "N/A",
+        year: "2023",
+        runtime: "5m",
+        res: "1080p MP4",
+        size: "1.1 GB",
         role: "Director",
-        year: "2022",
-        tech: "Sony Venice 2",
-        desc: "Experimental visual art installation projected on 360-degree screens.",
-        color: "from-zinc-800 to-black"
+        color: "from-orange-900 to-red-900"
     }
 ];
 
@@ -77,7 +107,8 @@ export default function CameraPortfolio() {
     const [powerOn, setPowerOn] = useState(true);
 
     // Navigation State
-    const [osdMode, setOsdMode] = useState(0); // 0: Full, 1: Minimal, 2: Clean
+    // 0: Standard, 1: Grids/Safe, 2: Clean, 3: Status Dashboard
+    const [osdMode, setOsdMode] = useState(0);
     const [galleryFocusIndex, setGalleryFocusIndex] = useState(0);
 
     // Clock Effect
@@ -136,8 +167,8 @@ export default function CameraPortfolio() {
     // DISP/BACK Button Logic
     const handleDispBack = () => {
         if (view === 'viewfinder') {
-            // Cycle OSD modes
-            setOsdMode((prev) => (prev + 1) % 3);
+            // Cycle OSD modes: Standard -> Grids -> Clean -> Status Dashboard
+            setOsdMode((prev) => (prev + 1) % 4);
         } else if (view === 'detail') {
             // Go back to Gallery
             setView('gallery');
@@ -278,15 +309,25 @@ export default function CameraPortfolio() {
                                 </div>
                             )}
 
-                            {/* Main Content */}
-                            <div className={`absolute inset-0 bg-cover bg-center transition-all duration-700 ${view !== 'viewfinder' ? 'blur-md scale-105 brightness-[0.25]' : 'scale-100'}`}
+                            {/* Main Content: Dynamic Video Feed Container */}
+                            <div className={`absolute transition-all duration-500 ease-in-out bg-cover bg-center border-zinc-800
+                   ${view !== 'viewfinder'
+                                ? 'blur-md scale-105 brightness-[0.25] inset-0'
+                                : osdMode === 3
+                                    ? 'top-8 left-8 w-[35%] aspect-video border border-white/20 shadow-2xl z-10'
+                                    : 'inset-0 scale-100 border-0'
+                            }`}
                                  style={{ backgroundImage: "url('https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=2071&auto=format&fit=crop')" }}>
                             </div>
 
-                            {/* Screen Effects */}
-                            <div className="absolute inset-0 scanline pointer-events-none opacity-20"></div>
-                            <div className="absolute inset-0 screen-pixel pointer-events-none opacity-30"></div>
-                            <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_50%,rgba(0,0,0,0.8)_100%)] pointer-events-none"></div>
+                            {/* Screen Effects (Only on full screen mode) */}
+                            {osdMode !== 3 && (
+                                <>
+                                    <div className="absolute inset-0 scanline pointer-events-none opacity-20"></div>
+                                    <div className="absolute inset-0 screen-pixel pointer-events-none opacity-30"></div>
+                                    <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_50%,rgba(0,0,0,0.8)_100%)] pointer-events-none"></div>
+                                </>
+                            )}
 
                             {/* === UI LAYERS (The OSD) === */}
                             {powerOn && !bootSequence && (
@@ -294,33 +335,161 @@ export default function CameraPortfolio() {
                                     {/* 1. Viewfinder Layer */}
                                     <div className={`absolute inset-0 p-4 md:p-6 flex flex-col justify-between transition-opacity duration-300 ${view === 'viewfinder' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
 
-                                        {/* Top OSD */}
-                                        {osdMode !== 2 && (
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex flex-col gap-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="bg-yellow-500/20 text-yellow-400 px-1 text-[10px] border border-yellow-500/50 rounded font-bold tracking-wider">STBY</span>
-                                                        <OSDText>3840x2160</OSDText>
-                                                        <OSDText className="text-white/70">RAW</OSDText>
+                                        {/* MODE 3: DASHBOARD / STATUS SCREEN */}
+                                        {osdMode === 3 && (
+                                            <div className="absolute inset-0 bg-black/90 p-8 grid grid-cols-2 gap-8 z-0">
+                                                {/* Left Column (Video sits here) */}
+                                                <div className="flex flex-col justify-end">
+                                                    {/* Audio Meters */}
+                                                    <div className="bg-[#111] p-4 rounded border border-white/10">
+                                                        <div className="flex justify-between items-center mb-2">
+                                                            <div className="flex items-center gap-2 text-white/50 text-[10px] uppercase font-bold tracking-wider">
+                                                                <Mic size={12} /> Audio Levels (8ch)
+                                                            </div>
+                                                            <div className="text-green-500 text-[10px]">48kHz 24-bit</div>
+                                                        </div>
+                                                        <div className="space-y-1.5">
+                                                            {[1,2,3,4,5,6,7,8].map(ch => (
+                                                                <div key={ch} className="flex items-center gap-2">
+                                                                    <span className="text-[9px] text-white/30 w-3">{ch}</span>
+                                                                    <div className="flex-1 h-1.5 bg-zinc-800 rounded-sm overflow-hidden flex">
+                                                                        <div className={`h-full ${ch < 3 ? 'w-[75%] bg-green-500' : 'w-[0%] bg-zinc-700'}`}></div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     </div>
-                                                    <OSDText className="text-xl">{formatTime(time)}</OSDText>
                                                 </div>
 
-                                                <div className="flex flex-col items-end gap-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_red]"></div>
-                                                        <OSDText className="text-red-500 tracking-widest">REC</OSDText>
+                                                {/* Right Column: Detailed Stats */}
+                                                <div className="flex flex-col gap-6 font-camera">
+                                                    {/* Histogram Box */}
+                                                    <div className="bg-[#111] p-4 rounded border border-white/10 h-32 flex items-end gap-1 relative overflow-hidden">
+                                                        <div className="absolute top-2 left-2 text-[10px] text-white/40 uppercase font-bold flex gap-2">
+                                                            <Activity size={12} /> Histogram RGB
+                                                        </div>
+                                                        {/* Fake Histogram Bars */}
+                                                        {Array.from({length: 40}).map((_, i) => (
+                                                            <div key={i} className="flex-1 bg-zinc-500 opacity-50 rounded-t-sm"
+                                                                 style={{height: `${Math.random() * 80 + 10}%`}}></div>
+                                                        ))}
                                                     </div>
-                                                    <OSDText className="text-2xl font-bold">00:04:23:12</OSDText>
-                                                    <div className="flex gap-3 text-green-400 mt-1">
-                                                        <div className="flex items-center gap-1"><BatteryMedium size={14}/><span className="text-xs">14.4V</span></div>
-                                                        <div className="flex items-center gap-1"><Film size={14}/><span className="text-xs">120m</span></div>
+
+                                                    {/* Large Values Grid */}
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="bg-[#1a1a1a] p-3 border-l-2 border-green-500">
+                                                            <div className="text-[10px] text-white/40 uppercase">Shutter Angle</div>
+                                                            <div className="text-3xl text-white">180.0°</div>
+                                                        </div>
+                                                        <div className="bg-[#1a1a1a] p-3 border-l-2 border-green-500">
+                                                            <div className="text-[10px] text-white/40 uppercase">Iris</div>
+                                                            <div className="text-3xl text-white">T2.8 1/2</div>
+                                                        </div>
+                                                        <div className="bg-[#1a1a1a] p-3 border-l-2 border-green-500">
+                                                            <div className="text-[10px] text-white/40 uppercase">White Balance</div>
+                                                            <div className="text-3xl text-white">5600K <span className="text-sm text-green-500">+2</span></div>
+                                                        </div>
+                                                        <div className="bg-[#1a1a1a] p-3 border-l-2 border-green-500">
+                                                            <div className="text-[10px] text-white/40 uppercase">EI / ISO</div>
+                                                            <div className="text-3xl text-white">800</div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Meta Info Footer */}
+                                                    <div className="mt-auto border-t border-white/10 pt-4 flex justify-between text-xs text-white/60">
+                                                        <div>
+                                                            <p>CODEC: ProRes 4444 XQ</p>
+                                                            <p>COLOR: LogC4</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p>TC: 14:22:10:05</p>
+                                                            <p>FPS: 24.00</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         )}
 
-                                        {/* Center Reticle */}
+                                        {/* MODES 0, 1: Standard OSD Layers */}
+                                        {osdMode < 2 && (
+                                            <div className="absolute inset-0 p-6 flex flex-col justify-between pointer-events-none">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="bg-yellow-500/20 text-yellow-400 px-1 text-[10px] border border-yellow-500/50 rounded font-bold tracking-wider">STBY</span>
+                                                            <OSDText>3840x2160</OSDText>
+                                                            <OSDText className="text-white/70">RAW</OSDText>
+                                                        </div>
+                                                        <OSDText className="text-xl">{formatTime(time)}</OSDText>
+                                                    </div>
+
+                                                    <div className="flex flex-col items-end gap-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_red]"></div>
+                                                            <OSDText className="text-red-500 tracking-widest">REC</OSDText>
+                                                        </div>
+                                                        <OSDText className="text-2xl font-bold">00:04:23:12</OSDText>
+                                                        <div className="flex gap-3 text-green-400 mt-1">
+                                                            <div className="flex items-center gap-1"><BatteryMedium size={14}/><span className="text-xs">14.4V</span></div>
+                                                            <div className="flex items-center gap-1"><HardDrive size={14}/><span className="text-xs">14.2 GB</span></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Bottom OSD (Exposure) */}
+                                                <div className="flex justify-between items-end bg-black/40 p-2 rounded backdrop-blur-sm border border-white/10">
+                                                    <div className="flex gap-6 text-center">
+                                                        <div>
+                                                            <div className="text-[9px] text-white/50 uppercase tracking-wider mb-1">Shutter</div>
+                                                            <OSDText>180°</OSDText>
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-[9px] text-white/50 uppercase tracking-wider mb-1">Iris</div>
+                                                            <OSDText>T2.0</OSDText>
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-[9px] text-white/50 uppercase tracking-wider mb-1">ISO</div>
+                                                            <OSDText>800</OSDText>
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-[9px] text-white/50 uppercase tracking-wider mb-1">WB</div>
+                                                            <OSDText>5600K</OSDText>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Histogram Sim */}
+                                                    <div className="flex gap-0.5 items-end h-8 w-24 opacity-80">
+                                                        {[40, 60, 30, 80, 50, 90, 20, 40, 70, 50, 30, 10, 5].map((h, i) => (
+                                                            <div key={i} style={{height: `${h}%`}} className="flex-1 bg-white/80"></div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* MODE 1: GRIDS & GUIDES */}
+                                        {osdMode === 1 && (
+                                            <div className="absolute inset-0 pointer-events-none">
+                                                {/* Rule of Thirds */}
+                                                <div className="absolute left-1/3 top-0 bottom-0 w-px bg-white/20"></div>
+                                                <div className="absolute right-1/3 top-0 bottom-0 w-px bg-white/20"></div>
+                                                <div className="absolute top-1/3 left-0 right-0 h-px bg-white/20"></div>
+                                                <div className="absolute bottom-1/3 left-0 right-0 h-px bg-white/20"></div>
+
+                                                {/* Center Crosshair (Large) */}
+                                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 opacity-50">
+                                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-green-400"></div>
+                                                    <div className="absolute top-1/2 left-0 -translate-y-1/2 h-[1px] w-full bg-green-400"></div>
+                                                </div>
+
+                                                {/* Safe Action Area (90%) */}
+                                                <div className="absolute inset-12 border border-white/20 rounded-sm"></div>
+                                                {/* Safe Title Area (80%) */}
+                                                <div className="absolute inset-20 border border-white/10 border-dashed rounded-sm"></div>
+                                            </div>
+                                        )}
+
+                                        {/* Center Reticle (Standard Mode Only) */}
                                         {osdMode === 0 && (
                                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 pointer-events-none opacity-60">
                                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-3 bg-white shadow-[0_0_2px_black]"></div>
@@ -331,36 +500,6 @@ export default function CameraPortfolio() {
                                             </div>
                                         )}
 
-                                        {/* Bottom OSD (Exposure) */}
-                                        {osdMode === 0 && (
-                                            <div className="flex justify-between items-end bg-black/40 p-2 rounded backdrop-blur-sm border border-white/10">
-                                                <div className="flex gap-6 text-center">
-                                                    <div>
-                                                        <div className="text-[9px] text-white/50 uppercase tracking-wider mb-1">Shutter</div>
-                                                        <OSDText>180°</OSDText>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-[9px] text-white/50 uppercase tracking-wider mb-1">Iris</div>
-                                                        <OSDText>T2.0</OSDText>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-[9px] text-white/50 uppercase tracking-wider mb-1">ISO</div>
-                                                        <OSDText>800</OSDText>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-[9px] text-white/50 uppercase tracking-wider mb-1">WB</div>
-                                                        <OSDText>5600K</OSDText>
-                                                    </div>
-                                                </div>
-
-                                                {/* Histogram Sim */}
-                                                <div className="flex gap-0.5 items-end h-8 w-24 opacity-80">
-                                                    {[40, 60, 30, 80, 50, 90, 20, 40, 70, 50, 30, 10, 5].map((h, i) => (
-                                                        <div key={i} style={{height: `${h}%`}} className="flex-1 bg-white/80"></div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
                                     </div>
 
                                     {/* 2. Gallery Layer */}
@@ -373,12 +512,18 @@ export default function CameraPortfolio() {
                                             {FILMS.map((film, index) => (
                                                 <button key={film.id} onClick={() => selectFilm(film)}
                                                         className={`group relative h-32 w-full rounded border hover:border-green-400 bg-zinc-900/80 text-left transition-all hover:scale-[1.02] overflow-hidden ${galleryFocusIndex === index ? 'border-green-400 ring-2 ring-green-500/50 scale-[1.02]' : 'border-white/10'}`}>
-                                                    <div className={`absolute inset-0 bg-gradient-to-br ${film.color} opacity-30 group-hover:opacity-50 transition-opacity`}></div>
+                                                    {/* Placeholder image from JSON/Constant */}
+                                                    <div className="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-80 transition-opacity" style={{backgroundImage: `url(${film.src})`}}></div>
+                                                    <div className={`absolute inset-0 bg-gradient-to-br ${film.color} opacity-40 mix-blend-multiply`}></div>
+
                                                     <div className="absolute inset-0 p-4 flex flex-col justify-between z-10">
-                                                        <span className="bg-black/50 self-start px-2 py-0.5 rounded text-[9px] text-white font-mono border border-white/10">{film.role}</span>
+                                                        <div className="flex justify-between items-start">
+                                                            <span className="bg-black/70 px-2 py-0.5 rounded text-[9px] text-white font-mono border border-white/10">{film.role}</span>
+                                                            <span className="text-[9px] text-white/60 font-mono bg-black/40 px-1 rounded">{film.size}</span>
+                                                        </div>
                                                         <div>
-                                                            <h3 className="text-white font-bold font-camera group-hover:text-green-400">{film.title}</h3>
-                                                            <p className="text-white/40 text-[10px] font-mono">{film.tech}</p>
+                                                            <h3 className="text-white font-bold font-camera group-hover:text-green-400 text-shadow">{film.title}</h3>
+                                                            <p className="text-white/60 text-[10px] font-mono">{film.res}</p>
                                                         </div>
                                                     </div>
                                                 </button>
@@ -387,26 +532,89 @@ export default function CameraPortfolio() {
                                     </div>
 
                                     {/* 3. Detail Layer */}
-                                    <div className={`absolute inset-0 bg-zinc-950/90 backdrop-blur-md p-8 flex flex-col transition-all duration-300 ${view === 'detail' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                                    <div className={`absolute inset-0 bg-zinc-950/95 backdrop-blur-md p-4 md:p-8 transition-all duration-300 ${view === 'detail' ? 'opacity-100 z-50' : 'opacity-0 pointer-events-none'}`}>
                                         {selectedFilm && (
-                                            <div className="h-full flex flex-col">
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <div className="border-l-4 border-green-500 pl-4">
-                                                        <h1 className="text-3xl text-white font-camera uppercase">{selectedFilm.title}</h1>
-                                                        <p className="text-green-500 font-mono text-xs mt-1">{selectedFilm.role} // {selectedFilm.year}</p>
+                                            <div className="h-full flex flex-col lg:flex-row gap-6">
+                                                {/* LEFT: Video Player (Takes maximum remaining space) */}
+                                                <div className="flex-1 flex flex-col min-h-0 min-w-0 justify-center">
+                                                    <div className="relative w-full h-auto max-h-full aspect-video bg-black rounded-lg border border-white/10 shadow-2xl overflow-hidden group">
+                                                        <div className="absolute inset-0 bg-cover bg-center opacity-80" style={{backgroundImage: `url(${selectedFilm.src})`}}></div>
+                                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <Play size={64} className="text-white/90 drop-shadow-xl hover:scale-110 transition-transform cursor-pointer" fill="currentColor" />
+                                                        </div>
+                                                        {/* Fake Timeline */}
+                                                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                                                            <div className="w-1/3 h-full bg-green-500"></div>
+                                                        </div>
+                                                        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] text-white font-mono border border-white/10">
+                                                            RAW PREVIEW
+                                                        </div>
                                                     </div>
-                                                    <button onClick={handleDispBack}><X className="text-white/50 hover:text-white transition-colors" /></button>
                                                 </div>
-                                                <div className={`flex-1 rounded-lg bg-gradient-to-br ${selectedFilm.color} border border-white/10 relative flex items-center justify-center mb-6 shadow-inner`}>
-                                                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
-                                                    <Play size={64} className="text-white drop-shadow-xl hover:scale-110 transition-transform cursor-pointer" fill="white" />
-                                                </div>
-                                                <div className="space-y-4 font-camera">
-                                                    <p className="text-white/80 text-sm leading-relaxed">{selectedFilm.desc}</p>
-                                                    <div className="flex gap-4 text-xs text-white/40 uppercase tracking-wider border-t border-white/10 pt-4">
-                                                        <span>{selectedFilm.tech}</span>
-                                                        <span>•</span>
-                                                        <span>ProRes 4444</span>
+
+                                                {/* RIGHT: Info Panel (Scrollable, readable width) */}
+                                                <div className="w-full lg:w-[400px] flex flex-col h-full overflow-hidden">
+                                                    <div className="flex justify-between items-start mb-6 shrink-0">
+                                                        <div className="border-l-4 border-green-500 pl-4">
+                                                            <h1 className="text-3xl md:text-4xl text-white font-camera uppercase leading-none mb-2 tracking-wide">{selectedFilm.title}</h1>
+                                                            <div className="flex items-center gap-2 text-green-500 font-mono text-xs">
+                                                                <span>{selectedFilm.year}</span>
+                                                                <span>//</span>
+                                                                <span className="uppercase">{selectedFilm.director}</span>
+                                                            </div>
+                                                        </div>
+                                                        <button onClick={handleDispBack} className="p-2 hover:bg-white/10 rounded-full transition-colors group">
+                                                            <X className="text-white/50 group-hover:text-white transition-colors" size={24} />
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent space-y-6 font-camera">
+
+                                                        {/* Synopsis */}
+                                                        <div className="bg-white/5 p-4 rounded-lg border border-white/5">
+                                                            <h4 className="text-white/40 text-[10px] uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                                <Clapperboard size={12} /> Synopsis
+                                                            </h4>
+                                                            <p className="text-white/90 text-sm md:text-base leading-relaxed font-sans">{selectedFilm.description}</p>
+                                                        </div>
+
+                                                        {/* Director's Note */}
+                                                        {selectedFilm.description2 && (
+                                                            <div className="bg-white/5 p-4 rounded-lg border border-white/5">
+                                                                <h4 className="text-white/40 text-[10px] uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                                    <CornerUpLeft size={12} /> Director's Note
+                                                                </h4>
+                                                                <p className="text-white/70 text-sm italic leading-relaxed font-serif">{selectedFilm.description2}</p>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Tech Specs Grid */}
+                                                        <div>
+                                                            <h4 className="text-white/40 text-[10px] uppercase tracking-widest mb-3 border-b border-white/10 pb-1">Production Specs</h4>
+                                                            <div className="grid grid-cols-2 gap-3">
+                                                                <div className="bg-black/40 p-2 rounded border border-white/10">
+                                                                    <span className="text-white/30 text-[9px] uppercase block mb-1">Cast</span>
+                                                                    <span className="text-white/90 text-xs font-medium">{selectedFilm.actor}</span>
+                                                                </div>
+                                                                <div className="bg-black/40 p-2 rounded border border-white/10">
+                                                                    <span className="text-white/30 text-[9px] uppercase block mb-1">Runtime</span>
+                                                                    <span className="text-white/90 text-xs font-mono">{selectedFilm.runtime}</span>
+                                                                </div>
+                                                                <div className="bg-black/40 p-2 rounded border border-white/10">
+                                                                    <span className="text-white/30 text-[9px] uppercase block mb-1">Format</span>
+                                                                    <span className="text-white/90 text-xs font-mono">{selectedFilm.res}</span>
+                                                                </div>
+                                                                <div className="bg-black/40 p-2 rounded border border-white/10">
+                                                                    <span className="text-white/30 text-[9px] uppercase block mb-1">Size</span>
+                                                                    <span className="text-white/90 text-xs font-mono">{selectedFilm.size}</span>
+                                                                </div>
+                                                                <div className="bg-black/40 p-2 rounded border border-white/10 col-span-2">
+                                                                    <span className="text-white/30 text-[9px] uppercase block mb-1">Role</span>
+                                                                    <span className="text-green-400 text-xs font-mono uppercase">{selectedFilm.role}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -575,6 +783,7 @@ export default function CameraPortfolio() {
                     </div>
 
                 </div>
+
             </div>
         </div>
     );
