@@ -1,0 +1,3 @@
+-Camera texture with real pics
+-Fix scrolling when on mobile
+-Videos are not shown on mobile
