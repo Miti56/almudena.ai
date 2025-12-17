@@ -4,15 +4,15 @@ export default function RoundButton({ name, label, icon: Icon, onClick, active, 
     const isPressed = activeButton === name;
 
     return (
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-1 md:gap-2">
             <button
                 onClick={onClick}
                 className={`
                     relative rounded-full border border-black transition-all duration-100 ease-out
                     flex items-center justify-center
                     
-                    /* SIZE CONFIG: Mobile vs Desktop */
-                    w-12 h-12 md:w-20 md:h-20
+                    /* CHANGED: Compact mobile size */
+                    w-11 h-11 md:w-20 md:h-20
                     
                     shadow-[0_4px_6px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.15)]
                     
@@ -27,13 +27,12 @@ export default function RoundButton({ name, label, icon: Icon, onClick, active, 
                 }
                 `}
             >
-                {/* LED Indicator */}
                 {active && (
                     <div className={`absolute top-1 md:top-2 w-1 h-1 md:w-1.5 md:h-1.5 rounded-full ${danger ? 'bg-red-500 shadow-[0_0_5px_red]' : 'bg-green-500 shadow-[0_0_5px_lime]'}`}></div>
                 )}
 
                 <Icon
-                    size={20}
+                    size={18}
                     className={`
                         transition-colors md:w-8 md:h-8
                         ${active
@@ -43,7 +42,7 @@ export default function RoundButton({ name, label, icon: Icon, onClick, active, 
                     `}
                 />
             </button>
-            <span className="text-[9px] md:text-xs font-bold text-zinc-600 uppercase tracking-widest">{label}</span>
+            <span className="text-[8px] md:text-xs font-bold text-zinc-600 uppercase tracking-widest">{label}</span>
         </div>
     );
 }

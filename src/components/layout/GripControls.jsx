@@ -9,20 +9,21 @@ export default function GripControls({
                                          toggleGallery,
                                          toggleInfo,
                                          togglePower,
-                                         toggleSelfie,   // New
-                                         isSelfieMode,   // New
+                                         toggleSelfie,
+                                         isSelfieMode,
                                          handleDispBack,
                                          activeButton,
                                          view,
                                          powerOn
                                      }) {
     return (
-        <div className="relative w-full md:w-96 bg-[#151515] flex flex-row md:flex-col items-center justify-between md:justify-start p-4 md:py-12 md:px-8 gap-2 md:gap-10 shadow-[-10px_0_20px_rgba(0,0,0,0.5)] z-20 md:border-l border-black shrink-0">
+        // CHANGED: py-2 on mobile (was py-4), adjusted height/width behavior
+        <div className="relative w-full md:w-96 bg-[#151515] flex flex-row md:flex-col items-center justify-around md:justify-start p-2 md:py-12 md:px-8 gap-2 md:gap-10 shadow-[-10px_0_20px_rgba(0,0,0,0.5)] z-20 md:border-l border-black shrink-0 h-auto min-h-[140px] md:h-auto">
 
             <div className="absolute inset-0 texture-leather opacity-80 pointer-events-none md:rounded-r-none"></div>
             <div className="hidden md:block absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-black/80 to-transparent pointer-events-none"></div>
 
-            {/* Top Dial */}
+            {/* Top Dial (Desktop Only) */}
             <div className="hidden md:flex flex-col items-center w-full relative z-10 mb-2">
                 <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-[#2a2a2a] to-[#111] shadow-[0_5px_10px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.1)] border border-[#000] flex items-center justify-center transform hover:rotate-12 transition-transform cursor-pointer">
                     <div className="absolute inset-0 rounded-full opacity-30" style={{ background: 'conic-gradient(from 0deg, transparent 0deg 2deg, black 2deg 4deg) repeating-conic-gradient(from 0deg, transparent 0deg 2deg, black 2deg 4deg)' }}></div>
@@ -33,19 +34,20 @@ export default function GripControls({
                 <span className="mt-3 text-[10px] font-sans font-bold text-zinc-600 tracking-widest uppercase text-shadow-sm">Multi-Function</span>
             </div>
 
-            {/* Navigation Cluster */}
-            <div className="relative z-10 flex flex-col items-center pl-2 md:pl-0">
-                <div className="relative w-28 h-28 md:w-44 md:h-44 rounded-full bg-[#181818] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),0_1px_1px_rgba(255,255,255,0.05)] flex items-center justify-center p-1 border border-black/50">
+            {/* D-PAD */}
+            <div className="relative z-10 flex flex-col items-center pl-1 md:pl-0">
+                {/* CHANGED: w-24 h-24 on mobile (Smaller) */}
+                <div className="relative w-24 h-24 md:w-44 md:h-44 rounded-full bg-[#181818] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),0_1px_1px_rgba(255,255,255,0.05)] flex items-center justify-center p-1 border border-black/50">
                     <div className="absolute inset-2 rounded-full bg-gradient-to-b from-black to-[#222] shadow-inner"></div>
 
                     <button onClick={() => { handlePress('up'); handleDirection('up'); }}
-                            className={`absolute top-2 md:top-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'up' ? 'text-green-500 scale-95' : ''}`}><ChevronUp size={20} className="md:w-8 md:h-8" /></button>
+                            className={`absolute top-1 md:top-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'up' ? 'text-green-500 scale-95' : ''}`}><ChevronUp size={20} className="md:w-8 md:h-8" /></button>
                     <button onClick={() => { handlePress('down'); handleDirection('down'); }}
-                            className={`absolute bottom-2 md:bottom-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'down' ? 'text-green-500 scale-95' : ''}`}><ChevronDown size={20} className="md:w-8 md:h-8" /></button>
+                            className={`absolute bottom-1 md:bottom-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'down' ? 'text-green-500 scale-95' : ''}`}><ChevronDown size={20} className="md:w-8 md:h-8" /></button>
                     <button onClick={() => { handlePress('left'); handleDirection('left'); }}
-                            className={`absolute left-2 md:left-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'left' ? 'text-green-500 scale-95' : ''}`}><ChevronLeft size={20} className="md:w-8 md:h-8" /></button>
+                            className={`absolute left-1 md:left-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'left' ? 'text-green-500 scale-95' : ''}`}><ChevronLeft size={20} className="md:w-8 md:h-8" /></button>
                     <button onClick={() => { handlePress('right'); handleDirection('right'); }}
-                            className={`absolute right-2 md:right-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'right' ? 'text-green-500 scale-95' : ''}`}><ChevronRight size={20} className="md:w-8 md:h-8" /></button>
+                            className={`absolute right-1 md:right-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'right' ? 'text-green-500 scale-95' : ''}`}><ChevronRight size={20} className="md:w-8 md:h-8" /></button>
 
                     <button onClick={() => { handlePress('ok', handleOk); }}
                             className={`
@@ -61,8 +63,9 @@ export default function GripControls({
                 </div>
             </div>
 
-            {/* Action Buttons Grid */}
-            <div className="grid grid-cols-2 grid-rows-3 md:grid-cols-2 gap-x-3 gap-y-3 md:gap-8 relative z-10 w-full px-2 justify-items-center">
+            {/* BUTTONS */}
+            {/* CHANGED: Tighter gap, adjusted grid for compact strip */}
+            <div className="grid grid-cols-3 md:grid-cols-2 gap-x-2 gap-y-2 md:gap-8 relative z-10 w-full px-1 justify-items-center">
                 <RoundButton
                     name="info"
                     label="Back"
@@ -80,15 +83,6 @@ export default function GripControls({
                     activeButton={activeButton}
                 />
                 <RoundButton
-                    name="settings"
-                    label="Info"
-                    icon={Settings}
-                    onClick={() => handlePress('settings', toggleInfo)}
-                    active={view === 'info'}
-                    activeButton={activeButton}
-                />
-                {/* NEW: Selfie Button */}
-                <RoundButton
                     name="selfie"
                     label="Selfie"
                     icon={Camera}
@@ -96,12 +90,18 @@ export default function GripControls({
                     active={isSelfieMode}
                     activeButton={activeButton}
                 />
-
-                {/* Power button - Span 2 cols on mobile, 2 cols on desktop at bottom */}
-                <div className="col-span-2 flex justify-center w-full mt-2">
+                <RoundButton
+                    name="settings"
+                    label="Info"
+                    icon={Settings}
+                    onClick={() => handlePress('settings', toggleInfo)}
+                    active={view === 'info'}
+                    activeButton={activeButton}
+                />
+                <div className="col-span-2 md:col-span-2 flex justify-center w-full">
                     <RoundButton
                         name="power"
-                        label="Power"
+                        label="Pwr"
                         icon={Power}
                         danger={true}
                         onClick={togglePower}
