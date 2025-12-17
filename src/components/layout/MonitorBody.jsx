@@ -33,7 +33,7 @@ export default function MonitorBody({
                 videoRef.current.play().catch(e => console.log("Stream play error", e));
             } else {
                 videoRef.current.srcObject = null;
-                videoRef.current.src = "./public/videoTest.mp4";
+                videoRef.current.src = "/images/videoTest.mp4";
                 videoRef.current.play().catch(e => console.log("Video play error", e));
             }
         }
