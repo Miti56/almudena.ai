@@ -5,6 +5,20 @@ import MonitorBody from './components/layout/MonitorBody';
 import GripControls from './components/layout/GripControls';
 
 export default function CameraPortfolio() {
+    const ACCESS_TOKEN = 'test'; // 👈 change this to anything
+
+    const params = new URLSearchParams(window.location.search);
+    const allowed =
+        // location.hostname === 'localhost' || params.get('access') === ACCESS_TOKEN;
+        params.get('access') === ACCESS_TOKEN;
+
+    if (!allowed) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-black text-white">
+                <h1 className="text-xl font-semibold">Access restricted</h1>
+            </div>
+        );
+    }
     const [view, setView] = useState('viewfinder');
     const [selectedFilm, setSelectedFilm] = useState(null);
     const [time, setTime] = useState(new Date());
