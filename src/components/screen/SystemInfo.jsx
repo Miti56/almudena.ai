@@ -33,7 +33,7 @@ export default function SystemInfo({ handleBack, isVisible }) {
                     <div className="md:hidden flex gap-4 items-center mb-2">
                         {/* Small Avatar for Mobile */}
                         <div className="w-20 h-20 shrink-0 bg-zinc-900 rounded border border-white/10 overflow-hidden relative">
-                            <img src="src/assets/almuPerfil.png" className="w-full h-full object-cover grayscale" alt="Profile" />
+                            <img src="./src/assets/almuPerfil.png" className="w-full h-full object-cover grayscale" alt="Profile" />
                         </div>
                         <div>
                             <h1 className="text-xl font-bold text-white leading-tight">{PROFILE.name}</h1>
@@ -47,7 +47,7 @@ export default function SystemInfo({ handleBack, isVisible }) {
 
                         {/* Big Image - HIDDEN ON MOBILE */}
                         <div className="hidden md:block relative aspect-[3/4] w-full bg-zinc-900 rounded-sm border border-white/10 overflow-hidden group">
-                            <img src="src/assets/almuPerfil.png" alt="Profile" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all grayscale" />
+                            <img src="./src/assets/almuPerfil.png" alt="Profile" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all grayscale" />
                             <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
                                 <div className="text-[10px] text-green-500 font-mono">ISO 800</div>
                             </div>
