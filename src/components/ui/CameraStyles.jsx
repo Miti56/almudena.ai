@@ -7,6 +7,20 @@ export default function CameraStyles() {
           @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
           .font-camera { font-family: 'Share Tech Mono', monospace; }
           
+          /* Prevent bouncing scroll on the whole page */
+          html, body, #root {
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: none; 
+            background-color: #121212;
+          }
+
+          /* Allow scrolling ONLY inside specific containers */
+          .overflow-y-auto {
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+          }
           
           .texture-body {
             background-color: #1a1a1a;
@@ -24,10 +38,13 @@ export default function CameraStyles() {
              background-image: radial-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.4) 100%);
              background-size: 3px 3px;
           }
-          /* Custom scrollbar for webkit */
-          .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+          .scrollbar-thin::-webkit-scrollbar { width: 4px; }
           .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
           .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+          
+          /* Hide scrollbar for clean UI but keep functionality */
+          .no-scrollbar::-webkit-scrollbar { display: none; }
+          .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}
         </style>
     );

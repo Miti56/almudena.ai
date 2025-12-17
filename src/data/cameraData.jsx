@@ -16,7 +16,7 @@ export const FILMS = [
     },
     {
         id: 2,
-        src: "https://images.unsplash.com/photo-1505673598505-51722bc28c1d?q=80&w=2070&auto=format&fit=crop",
+        src: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2525&auto=format&fit=crop",
         title: "CUÍDALAS",
         description: "Rosario(75) se siente frustrada por estar perdiendo su autonomía, y con ello su utilidad en la familia. Rosita(7) se siente dejada de lado. Y Rosa(40) no da a basto entre los cuidados de su madre, su hija y las llamadas telefónicas constantes.",
         description2: "Este cortometraje es un retrato intergeneracional que pone el foco en los cuidados, y en el autocuidado. Formalmente, se explora el sostenimiento de los planos como herramienta para construir una atmósfera densa y pausada, que insinue un espacio limbo, casi onírico.",

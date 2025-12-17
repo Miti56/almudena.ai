@@ -1,0 +1,13 @@
+-screws on moile are too close to the screen
+-remove pre selected gallery item unless the naviagtion keys are pressed
+-Add selfie mode? Enable camera so you can llok at yourself?
+-when pressing navigation buttons, UI element with insrtuctions?
+-bigger buttons on desktop to give them more importance? so its clearer you cac.ick on them to navigate thru the UI
+-Back button also on playback menu
+
+
+
+-stop white navbar iphone
+-smaller bottoms bar, more screen real state, make it better fitted for newer iphone that are taller
+-When going down with navigation key, also scroll on mobile
+-maybe block scrolling from non ui elements? in phone scrolling the hui does look wierd, doesnt happen in laptop

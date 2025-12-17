@@ -140,6 +140,8 @@ export default function MonitorBody({
                     <div className="w-3 h-3 rounded-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,1)] animate-pulse border border-black/50"></div>
                 </div>
             )}
+
         </div>
+
     );
 }

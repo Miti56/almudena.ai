@@ -1,51 +1,49 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FILMS } from './data/cameraData';
+import { FILMS } from './data/cameraData'; // Ensure this path is correct
 import CameraStyles from './components/ui/CameraStyles';
 import MonitorBody from './components/layout/MonitorBody';
 import GripControls from './components/layout/GripControls';
 
 export default function CameraPortfolio() {
-    const [view, setView] = useState('viewfinder'); // viewfinder, gallery, info, detail
+    // ... (Keep all your existing State logic exactly the same: view, selectedFilm, time, etc.)
+    const [view, setView] = useState('viewfinder');
     const [selectedFilm, setSelectedFilm] = useState(null);
     const [time, setTime] = useState(new Date());
     const [isRecording, setIsRecording] = useState(true);
     const [activeButton, setActiveButton] = useState(null);
     const [bootSequence, setBootSequence] = useState(true);
     const [powerOn, setPowerOn] = useState(true);
-
-    // Navigation State
-    // 0: Standard, 1: Grids/Safe, 2: Clean, 3: Status Dashboard
     const [osdMode, setOsdMode] = useState(0);
     const [galleryFocusIndex, setGalleryFocusIndex] = useState(0);
-    const [gridMode, setGridMode] = useState(2); // 2 for 2x2, 3 for 3x3
+    const [gridMode, setGridMode] = useState(2);
 
-    // Clock Effect
+    // ... (Keep your existing useEffects and handlers: formatTime, togglePower, etc.)
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
 
-    // Boot Sequence Effect
     useEffect(() => {
-        if (powerOn) {
-            setBootSequence(true);
+        if (powerOn && bootSequence) {
             const timer = setTimeout(() => setBootSequence(false), 2000);
             return () => clearTimeout(timer);
         }
-    }, [powerOn]);
+    }, [powerOn, bootSequence]);
 
-    // Format Time
     const formatTime = (date) => {
         return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
     };
 
     const togglePower = () => {
-        setPowerOn(!powerOn);
-        if (powerOn) setIsRecording(false);
-        else setIsRecording(true);
+        if (!powerOn) {
+            setBootSequence(true);
+            setIsRecording(true);
+            setPowerOn(true);
+        } else {
+            setIsRecording(false);
+            setPowerOn(false);
+        }
     };
-
-    // --- Navigation Logic ---
 
     const handlePress = useCallback((btnName, action) => {
         if (!powerOn && btnName !== 'power') return;
@@ -65,24 +63,16 @@ export default function CameraPortfolio() {
     };
 
     const toggleInfo = () => {
-        if (view === 'info') {
-            setView('viewfinder');
-        } else {
-            setView('info');
-        }
+        setView(prev => prev === 'info' ? 'viewfinder' : 'info');
     };
 
-    // DISP/BACK Button Logic
     const handleDispBack = () => {
         if (view === 'viewfinder') {
-            // Cycle OSD modes: Standard -> Grids -> Clean -> Status Dashboard
             setOsdMode((prev) => (prev + 1) % 4);
         } else if (view === 'detail') {
-            // Go back to Gallery
             setView('gallery');
             setSelectedFilm(null);
         } else {
-            // Go back to Viewfinder (from Gallery or Info)
             setView('viewfinder');
             setSelectedFilm(null);
         }
@@ -92,21 +82,12 @@ export default function CameraPortfolio() {
         setGridMode(prev => prev === 2 ? 3 : 2);
     };
 
-    // D-Pad Navigation Logic
-    // D-Pad Navigation Logic
     const handleDirection = (dir) => {
         if (view === 'gallery') {
-            // FIX: Detect if we are on mobile (less than 768px matches Tailwind 'md')
             const isMobile = window.innerWidth < 768;
-
-            // If mobile, effective columns is 1. If desktop, use the selected gridMode.
             const cols = isMobile ? 1 : gridMode;
-
-            // Logic remains the same, but 'cols' is now dynamic based on screen size
             if (dir === 'left') setGalleryFocusIndex(prev => Math.max(0, prev - 1));
             if (dir === 'right') setGalleryFocusIndex(prev => Math.min(FILMS.length - 1, prev + 1));
-
-            // Up/Down now respects the visual layout
             if (dir === 'down') setGalleryFocusIndex(prev => Math.min(FILMS.length - 1, prev + cols));
             if (dir === 'up') setGalleryFocusIndex(prev => Math.max(0, prev - cols));
         }
@@ -116,8 +97,6 @@ export default function CameraPortfolio() {
         if (view === 'gallery') {
             setSelectedFilm(FILMS[galleryFocusIndex]);
             setView('detail');
-        } else if (view === 'viewfinder') {
-            // Could open a quick menu in future
         }
     };
 
@@ -127,12 +106,13 @@ export default function CameraPortfolio() {
     };
 
     return (
-        <div className="h-screen w-full bg-[#121212] font-sans overflow-hidden select-none">
+        // CHANGED: h-[100dvh] for mobile browsers, added touch-none to prevent drag-scrolling the app shell
+        <div className="h-[100dvh] w-full bg-[#121212] font-sans overflow-hidden select-none touch-none">
             <CameraStyles />
             <div className="relative w-full h-full texture-body flex flex-col md:flex-row overflow-hidden">
-                {/* Subtle Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/60 pointer-events-none"></div>
 
+                {/* MonitorBody takes remaining space */}
                 <MonitorBody
                     powerOn={powerOn}
                     bootSequence={bootSequence}
@@ -149,6 +129,7 @@ export default function CameraPortfolio() {
                     handleBack={handleDispBack}
                 />
 
+                {/* GripControls is fixed height on mobile or auto on desktop */}
                 <GripControls
                     handlePress={handlePress}
                     handleDirection={handleDirection}
