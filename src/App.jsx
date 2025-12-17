@@ -9,8 +9,8 @@ export default function CameraPortfolio() {
 
     const params = new URLSearchParams(window.location.search);
     const allowed =
-        // location.hostname === 'localhost' || params.get('access') === ACCESS_TOKEN;
-        params.get('access') === ACCESS_TOKEN;
+        location.hostname === 'localhost' || params.get('access') === ACCESS_TOKEN;
+        //params.get('access') === ACCESS_TOKEN;
 
     if (!allowed) {
         return (
