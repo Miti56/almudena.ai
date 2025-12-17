@@ -2,13 +2,13 @@
   command = "npm run build"
   publish = "dist"
 
-# SPA fallback (prevents 404 crawl storms)
+# SPA fallback for React routes
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# Aggressive asset caching
+# Aggressive caching for static assets
 [[headers]]
   for = "/assets/*"
   [headers.values]
