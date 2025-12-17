@@ -1,8 +1,8 @@
 -screws on moile are too close to the screen
 -remove pre selected gallery item unless the naviagtion keys are pressed
--Add selfie mode? Enable camera so you can llok at yourself?
--when pressing navigation buttons, UI element with insrtuctions?
--bigger buttons on desktop to give them more importance? so its clearer you cac.ick on them to navigate thru the UI
+-Add selfie mode? Enable camera so you can llok at yourself? Add a button for that too
+-when pressing navigation buttons on the main menu, UI element with insrtuctions?
+-bigger buttons on desktop to give them more importance? so its clearer you can click on them to navigate thru the UI
 -Back button also on playback menu
 
 
