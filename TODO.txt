@@ -1,0 +1,24 @@
+-768 only fix- keep until 13 pro size
+-red button bling in mobile view inside the screen
+-Fix small details (work, locatiion
+-Add CV to download
+-Power does not turn off completly the camera, I can still see some of the video playing in the background (gamma?)
+-Power should bring the website to the index, like a real turn off would do.
+-Viewfinder still looks weird, the lines should cpme accross from the sides of the border of the screen.
+-On mobile the viewfinder alternative view (where the video becomes smaller) still looks weird. Audio graph should be more squished t let the video get closer to its orginal size.
+-On mobile would be easier to use like a joytic instead of buttons. Small size make it hard tgo click, while a small joystic would make it easier to use.
+-Remove animation when the viewfinder switches sizes. Real camera dont have fancy animation when switching view modes.
+-All the views are very optimised for 16:9 or phone aspect ratios. iPad or similar (810x0180P) breaks
+    -Mostly Operator screen (side scroll needed)
+    -Viewfinder is a mess, everything is squished in both orientations of an ipad
+    -In landscape mode, in gallery, the video is completluy squished.
+-Improve aluminium texture, buttons very high resolution, right side also, but screen borders dont look sharp.
+-Power button when ON becomes seethru
+-Screws look to fake, they do not cross properly making the ilusion go away, when zoomed in it does not work. Screw doesnt move exactly with my zoom breaking ilusion.
+
+
+================== IDEAS ==================
+-When opening a video to see more information. Coverflow IOS 6 like style. With reflections at the bottom, be able to scroll between all the movies.
+-Add better indication that the camera is off? Maybe chartgin symbol? Waitingfor user input?
+-The bootup squence when page loads, should be more effective in showcasing its showcasing a portfolio of a director, also add who did it (me)
+-Viewfinder alt mode still looks very empty, add more details to increase the camera like feeling
