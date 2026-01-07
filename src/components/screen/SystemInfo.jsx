@@ -4,11 +4,16 @@ import { SKILLS, EXPERIENCE } from '../../data/cameraData';
 
 export default function SystemInfo({ handleBack, isVisible }) {
     const PROFILE = {
-        name: "ALMUDENA MIRONES",
-        role: "DIRECTOR OF PHOTOGRAPHY",
-        location: "Madrid / Paris",
-        bio: "Visual storyteller obsessed with natural light and raw textures.",
-        socials: { instagram: "#", linkedin: "#", imdb: "#" }
+        name: "ALMUDENA MIRONES RIOTTE",
+        role: "Meritoria de Dirección",
+        location: "Madrid",
+        bio: "Hola :)",
+        socials: {
+            instagram: "https://www.instagram.com/almudenamirones",
+            linkedin: "https://www.linkedin.com/in/almudena-mirones-riotte",
+            imdb: "https://www.imdb.com/name/nm12345678",
+            website: "https://almudenamirones.com"
+        }
     };
 
     return (
@@ -61,10 +66,17 @@ export default function SystemInfo({ handleBack, isVisible }) {
                             <SocialButton icon={ExternalLink} href="#" />
                         </div>
 
-                        <button className="w-full bg-white/5 hover:bg-green-500/20 border border-white/10 text-white p-3 flex items-center justify-center gap-2 group">
-                            <FileText size={16} className="text-green-500"/>
-                            <span className="text-xs font-bold tracking-widest">DOWNLOAD CV</span>
-                        </button>
+                        <a
+                            href="/cv/CV_ALMUDENA_MIRONES_RIOTTE.pdf"
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full bg-white/5 hover:bg-green-500/20 border border-white/10 text-white p-3 flex items-center justify-center gap-2 group"
+                        >
+                            <FileText size={16} className="text-green-500" />
+                            <span className="text-xs font-bold tracking-widest">DESCARGAR CV</span>
+                        </a>
+
                     </div>
 
                     {/* --- RIGHT COLUMN --- */}
@@ -125,7 +137,12 @@ export default function SystemInfo({ handleBack, isVisible }) {
 
 function SocialButton({ icon: Icon, href }) {
     return (
-        <a href={href} className="flex items-center justify-center p-3 bg-[#151515] border border-white/5 hover:bg-[#222]">
+        <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center p-3 bg-[#151515] border border-white/5 hover:bg-[#222]"
+        >
             <Icon size={16} className="text-zinc-500 hover:text-white" />
         </a>
     );

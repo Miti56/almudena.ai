@@ -126,7 +126,42 @@ export const SKILLS = [
 ];
 
 export const EXPERIENCE = [
-    { year: "2024", role: "Freelance DOP", company: "Global Studios" },
-    { year: "2022", role: "Camera Operator", company: "Indie Feature 'Dust'" },
-    { year: "2020", role: "Focus Puller", company: "TV Series 'The Shift'" },
+    {
+        year: "Dic 2025 – Actualidad",
+        role: "Meritoria de Dirección",
+        company: "Núcleo TV · Serie 'Furia' T2 (HBO)",
+    },
+    {
+        year: "Jun 2025 – Sep 2025",
+        role: "Meritoria de Dirección",
+        company: "DLO Producciones · Serie 'El Inmortal' T3 (Movistar+)",
+    },
+    {
+        year: "Feb 2025 – Abr 2025",
+        role: "Becaria de Dirección",
+        company: "GRUP MEDIAPRO · Película 'Aída y Vuelta' (Dir. Paco León)",
+    },
+    {
+        year: "Nov 2024 y May 2025",
+        role: "Auxiliar de Refuerzo",
+        company: "Bambú Producciones · Serie diaria 'Valle Salvaje'",
+    },
+    {
+        year: "Jul 2024 – Sep 2024",
+        role: "Becaria de Dirección",
+        company: "Bambú Producciones · Serie diaria 'Valle Salvaje' (RTVE / Netflix)",
+    },
+    {
+        year: "Sep 2023 – Jun 2024",
+        role: "Profesora de Teatro",
+        company:
+            "Liceo Francés de Madrid · Intervención en 2º de primaria con puesta en escena final",
+    },
+    {
+        year: "Sep 2021 – Jun 2022",
+        role: "Profesora de Teatro",
+        company:
+            "Colegio Cardenal Spínola (Madrid) · Actividad extraescolar con niños/as de 4 y 7 años",
+    },
 ];
+
