@@ -9,10 +9,10 @@ export default function SystemInfo({ handleBack, isVisible }) {
         location: "Madrid",
         bio: "Hola :)",
         socials: {
-            instagram: "https://www.instagram.com/almudenamirones",
-            linkedin: "https://www.linkedin.com/in/almudena-mirones-riotte",
-            imdb: "https://www.imdb.com/name/nm12345678",
-            website: "https://almudenamirones.com"
+            instagram: "https://www.instagram.com/_almuu._/s",
+            linkedin: "https://www.linkedin.com/in/almudena-mirones-riotte/",
+            imdb: "https://www.imdb.com/fr/name/nm17673372/",
+            website: "https://almudena.art"
         }
     };
 
