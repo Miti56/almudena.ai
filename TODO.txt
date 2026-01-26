@@ -1,6 +1,5 @@
 -768 only fix- keep until 13 pro size
 -red button bling in mobile view inside the screen
--Fix small details (work, locatiion
 -Add CV to download
 -Power does not turn off completly the camera, I can still see some of the video playing in the background (gamma?)
 -Power should bring the website to the index, like a real turn off would do.
