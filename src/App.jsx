@@ -5,7 +5,7 @@ import MonitorBody from './components/layout/MonitorBody';
 import GripControls from './components/layout/GripControls';
 
 export default function CameraPortfolio() {
-    const ACCESS_TOKEN = 'test'; // 👈 change this to anything
+    const ACCESS_TOKEN = 'test';
 
     const params = new URLSearchParams(window.location.search);
     const allowed =
@@ -46,7 +46,7 @@ export default function CameraPortfolio() {
     // Boot
     useEffect(() => {
         if (powerOn && bootSequence) {
-            const timer = setTimeout(() => setBootSequence(false), 2000);
+            const timer = setTimeout(() => setBootSequence(false), 5000);
             return () => clearTimeout(timer);
         }
     }, [powerOn, bootSequence]);

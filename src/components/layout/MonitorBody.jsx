@@ -39,30 +39,103 @@ export default function MonitorBody({
         }
     }, [webcamStream]);
 
+    // Reusable Boot Log Line Component
+    const BootLine = ({ text, delay }) => (
+        <div
+            className="flex items-center gap-2 text-green-500/90 font-mono text-xs md:text-sm font-bold tracking-wide opacity-0 animate-[slideIn_0.3s_ease-out_forwards]"
+            style={{ animationDelay: delay }}
+        >
+            <span className="text-green-500">{'>'}</span>
+            {text}
+        </div>
+    );
+
     return (
-        // CHANGED: p-0 on mobile, flex-1 to take available space
         <div className="flex-1 relative p-0 md:p-8 flex flex-col items-center justify-center z-10 w-full overflow-hidden">
 
+            {/* Custom Keyframes for the boot sequence */}
+            <style>{`
+                @keyframes slideIn {
+                    from { opacity: 0; transform: translateY(5px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `}</style>
+
             {/* --- BEZEL CONTAINER --- */}
-            {/* CHANGED: Removed rounded corners, shadows, and thick borders on mobile */}
             <div className="relative w-full h-full bg-[#0a0a0a] md:rounded-lg md:shadow-[inset_0_0_20px_rgba(0,0,0,1),0_1px_0_rgba(255,255,255,0.1)] p-0 md:p-2 md:border-t md:border-white/5 md:border-b md:border-black flex flex-col overflow-hidden">
 
                 {/* Top Bezel (Desktop Only) */}
                 <div className="hidden md:block h-2 w-full bg-black mb-1 rounded-t-sm"></div>
 
                 {/* --- LCD SCREEN --- */}
-                {/* CHANGED: Added border-b for mobile separation */}
                 <div className={`relative flex-1 w-full bg-black overflow-hidden shadow-none md:shadow-[inset_0_0_10px_rgba(0,0,0,1)] transition-opacity duration-500 ${!powerOn ? 'opacity-10' : 'opacity-100'} md:rounded-sm border-b border-white/20 md:border-0`}>
 
-                    {/* Boot Sequence */}
+                    {/* --- BOOT SEQUENCE START --- */}
                     {powerOn && bootSequence && (
-                        <div className="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center">
-                            <div className="text-green-500 font-camera text-sm mb-4 animate-pulse">INITIALIZING...</div>
-                            <div className="w-48 h-1 bg-zinc-800 rounded overflow-hidden">
-                                <div className="h-full bg-green-500 animate-[width_2s_ease-out_forwards]" style={{ width: '0%' }}></div>
+                        <div className="absolute inset-0 z-50 bg-black flex flex-col p-6 md:p-12 font-mono select-none overflow-hidden">
+
+                            {/* 1. Header Info */}
+                            <div className="flex justify-between items-start border-b border-zinc-800 pb-2 mb-8 animate-[fade-in_0.5s_ease-out]">
+                                <div className="text-xs text-zinc-500">
+                                    <div>SYS.BOOT_SEQ // v2.4.0</div>
+                                    <div>MEM_CHECK: 64GB OK</div>
+                                </div>
+                                <div className="text-xs text-zinc-600 text-right">
+                                    PORTFOLIO_OS
+                                </div>
                             </div>
+
+                            {/* 2. Main Identity (Center) */}
+                            <div className="flex-1 flex flex-col justify-center items-center gap-6">
+                                <div className="text-center space-y-2 animate-[slideIn_0.8s_ease-out_0.2s_both]">
+                                    <h1 className="text-2xl md:text-5xl text-white font-black tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+                                        ALMUDENA
+                                    </h1>
+                                    <h2 className="text-lg md:text-2xl text-zinc-400 font-bold tracking-[0.4em] uppercase">
+                                        Mirones Riotte
+                                    </h2>
+                                </div>
+
+                                {/* Progress Bar */}
+                                <div className="w-full max-w-xs md:max-w-md mt-4">
+                                    <div className="h-2 w-full bg-zinc-900 border border-zinc-700 p-[1px]">
+                                        <div
+                                            className="h-full bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-[width_2.5s_cubic-bezier(0.22,1,0.36,1)_forwards]"
+                                            style={{ width: '0%' }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 3. Rolling Technical Log (Bottom) */}
+                            <div className="mt-auto border-t border-zinc-800 pt-4 flex flex-col md:flex-row justify-between items-end gap-4">
+
+                                {/* The Log Output */}
+                                <div className="flex flex-col gap-1 w-full">
+                                    <BootLine text="MOUNTING VIRTUAL LENS..." delay="200ms" />
+                                    <BootLine text="CALIBRATING SENSOR [35MM]..." delay="600ms" />
+                                    <BootLine text="LOADING COLOR PROFILES (REC.709)..." delay="1000ms" />
+                                    <BootLine text="INITIALIZING UI..." delay="1400ms" />
+                                    <div className="flex items-center gap-2 text-white font-bold text-xs md:text-sm animate-pulse mt-1" style={{ animationDelay: '1800ms' }}>
+                                        <span className="text-green-500">{'>'}</span> SYSTEM READY_
+                                    </div>
+                                </div>
+
+                                {/* The Credit - Now Static (No Delay) */}
+                                <div className="min-w-max text-right">
+                                    <div className="text-[10px] md:text-xs text-zinc-600 uppercase tracking-widest mb-1">Architecture</div>
+                                    <div className="text-xs md:text-sm text-zinc-400 font-bold">
+                                        designed with <span className="text-red-900">♥</span> by miti
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* CRT overlay effect just for boot */}
+                            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-50 bg-[length:100%_2px,3px_100%] pointer-events-none opacity-20"></div>
                         </div>
                     )}
+                    {/* --- BOOT SEQUENCE END --- */}
+
 
                     {/* VIDEO FEED */}
                     <video

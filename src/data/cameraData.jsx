@@ -86,7 +86,7 @@ export const FILMS = [
     },
     {
         id: 6,
-        src: "/images/ultima.png",
+        src: "/images/ultima.webp",
         title: "La Última Función. Para Siempre.",
         description:
             "Un grupo de teatro amateur realiza su última función, cerrando una etapa vital.",

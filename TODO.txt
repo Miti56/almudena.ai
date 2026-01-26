@@ -16,10 +16,7 @@
 -Power button when ON becomes seethru
 -Screws look to fake, they do not cross properly making the ilusion go away, when zoomed in it does not work. Screw doesnt move exactly with my zoom breaking ilusion.
 
-WORKING FAV ICON
-
 ================== IDEAS ==================
 -When opening a video to see more information. Coverflow IOS 6 like style. With reflections at the bottom, be able to scroll between all the movies.
 -Add better indication that the camera is off? Maybe chartgin symbol? Waitingfor user input?
--The bootup squence when page loads, should be more effective in showcasing its showcasing a portfolio of a director, also add who did it (me)
 -Viewfinder alt mode still looks very empty, add more details to increase the camera like feeling
