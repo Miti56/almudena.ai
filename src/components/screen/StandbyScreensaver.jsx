@@ -9,6 +9,7 @@ export default function StandbyScreensaver({ active }) {
     useEffect(() => {
         if (!active) return;
 
+        // 6000ms rotation
         const interval = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % FILMS.length);
         }, 6000);
@@ -26,11 +27,11 @@ export default function StandbyScreensaver({ active }) {
             const m = d.getMinutes().toString().padStart(2, '0');
             const h = d.getHours().toString().padStart(2, '0');
             setTimecode(`${h}:${m}:${s}:${ms}`);
-        }, 40); // 25fps-ish update
+        }, 40);
         return () => clearInterval(tcInterval);
     }, [active]);
 
-    // Memoize random technical values so they don't jitter uncontrollably
+    // Memoize audio levels
     const audioLevels = useMemo(() => Array.from({ length: 12 }, () => Math.random() * 100), [currentIndex]);
 
     return (
@@ -51,7 +52,6 @@ export default function StandbyScreensaver({ active }) {
                                 className={`w-full h-full object-cover transition-transform duration-[8000ms] ease-out will-change-transform
                                 ${isActive ? 'scale-110' : 'scale-100'} grayscale-[20%] contrast-110`}
                             />
-                            {/* Cinematic Darkening */}
                             <div className="absolute inset-0 bg-black/40 mix-blend-multiply"></div>
                         </div>
                     </div>
@@ -61,7 +61,7 @@ export default function StandbyScreensaver({ active }) {
             {/* --- LAYER 2: GLOBAL CAMERA HUD (Static Elements) --- */}
             <div className="absolute inset-0 pointer-events-none p-4 md:p-8 flex flex-col justify-between z-10">
 
-                {/* Top Bar: Status */}
+                {/* Top Status Bar */}
                 <div className="flex justify-between items-start text-[10px] md:text-xs tracking-widest text-red-500/90 font-bold">
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
@@ -86,19 +86,17 @@ export default function StandbyScreensaver({ active }) {
                     </div>
                 </div>
 
-                {/* Center: Focus Brackets & Crosshair */}
+                {/* Center Crosshairs */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-60">
-                    {/* Center Cross */}
                     <div className="relative w-8 h-8 md:w-16 md:h-16">
                         <div className="absolute top-1/2 left-0 w-full h-[1px] bg-white/30"></div>
                         <div className="absolute left-1/2 top-0 h-full w-[1px] bg-white/30"></div>
                     </div>
-                    {/* Corners */}
                     <div className="absolute w-[60%] h-[60%] border border-white/10"></div>
                     <div className="absolute w-[90%] h-[90%] border-t border-b border-white/5"></div>
                 </div>
 
-                {/* Right Side: Audio Meters (Simulated) */}
+                {/* Audio Meters */}
                 <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 flex gap-1 h-32 opacity-70">
                     <div className="flex flex-col justify-end h-full gap-[2px]">
                         <span className="text-[8px] text-white/50 mb-1">L</span>
@@ -152,26 +150,34 @@ export default function StandbyScreensaver({ active }) {
                                     <span>FILE_ID</span> <span className="text-white tracking-widest">C00{film.id}_XH2S_LOG</span>
                                 </div>
                             </div>
+
+                            {/* --- NEW: TIMER LINE (Buffer Indicator) --- */}
+                            <div className="mt-4 flex items-center gap-3 w-full md:w-1/2">
+                                <span className="text-[9px] text-white/40 tracking-widest whitespace-nowrap">NEXT_SEQ</span>
+                                <div className="flex-1 h-[2px] bg-white/10 relative overflow-hidden">
+                                    {/* The width goes from 100% to 0% over 6 seconds */}
+                                    <div className="absolute inset-y-0 left-0 bg-white/80 animate-[buffer_6s_linear_forwards] origin-left"></div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 );
             })}
 
             {/* --- LAYER 4: TEXTURE & OVERLAYS --- */}
-
-            {/* Vignette */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.6)_100%)] z-30 pointer-events-none"></div>
-
-            {/* Scanlines */}
             <div className="absolute inset-0 z-40 opacity-[0.07] pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]"></div>
-
-            {/* Grain */}
             <div className="absolute inset-0 z-40 opacity-[0.03] pointer-events-none animate-[grain_8s_steps(10)_infinite] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
 
             <style>{`
                 @keyframes slideIn {
                     from { opacity: 0; transform: translateX(-20px); }
                     to { opacity: 1; transform: translateX(0); }
+                }
+                @keyframes buffer {
+                    from { width: 100%; }
+                    to { width: 0%; }
                 }
                 @keyframes grain {
                     0%, 100% { transform: translate(0, 0); }
