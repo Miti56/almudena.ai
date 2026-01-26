@@ -4,7 +4,7 @@ import Viewfinder from '../screen/Viewfinder';
 import Gallery from '../screen/Gallery';
 import FilmDetail from '../screen/FilmDetail';
 import SystemInfo from '../screen/SystemInfo';
-import dirtImg from '../../assets/textures/001.jpg';
+import dirtImg from '../../assets/textures/001.webp';
 
 export default function MonitorBody({
                                         powerOn,
