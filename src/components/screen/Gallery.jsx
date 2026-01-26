@@ -53,7 +53,14 @@ export default function Gallery({ galleryFocusIndex, gridMode, toggleGridMode, s
                                 ${isSelected ? 'border-green-400 ring-2 ring-green-500/50 scale-[1.02] z-10' : 'border-white/10 hover:border-white/40'}
                             `}
                         >
-                            <div className="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-80 transition-opacity" style={{ backgroundImage: `url(${film.src})` }}></div>
+                            {/*<div className="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-80 transition-opacity" style={{ backgroundImage: `url(${film.src})` }}></div>*/}
+                            <img
+                                src={film.src}
+                                alt={film.title}
+                                loading="lazy"
+                                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                            />
+
                             <div className={`absolute inset-0 bg-gradient-to-br ${film.color} opacity-40 mix-blend-multiply`}></div>
 
                             <div className="absolute inset-0 p-3 md:p-4 flex flex-col justify-between z-10">

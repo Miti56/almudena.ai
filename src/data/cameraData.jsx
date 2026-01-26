@@ -1,7 +1,7 @@
 export const FILMS = [
     {
         id: 1,
-        src: "/images/alas.JPG",
+        src: "/images/alas.webp",
         title: "ALAS DE PAPEL",
         description:
             "Martina, una niña con mucha imaginación, vive sus primeras Navidades sabiendo que Papá Noel no existe, rodeada de una familia caótica y amorosa con la que se siente incomprendida.",
@@ -18,7 +18,7 @@ export const FILMS = [
     },
     {
         id: 2,
-        src: "/images/cuidalas.JPG",
+        src: "/images/cuidalas.webp",
         title: "CUÍDALAS",
         description:
             "Rosario (75) se siente frustrada por estar perdiendo su autonomía. Rosita (7) se siente dejada de lado. Rosa (40) no da abasto entre los cuidados de su madre, su hija y las llamadas constantes.",
@@ -35,7 +35,7 @@ export const FILMS = [
     },
     {
         id: 3,
-        src: "/images/grito.JPG",
+        src: "/images/grito.webp",
         title: "UN CRI DANS LE VIDE, UN DEUIL EN SILENCE",
         description:
             "Dos compañeros de piso atraviesan las distintas fases del duelo tras el suicidio de uno de sus mejores amigos.",
@@ -52,7 +52,7 @@ export const FILMS = [
     },
     {
         id: 4,
-        src: "/images/tamahine.JPG",
+        src: "/images/tamahine.webp",
         title: "TAMAHINE ITI",
         description:
             "Cuando una niña pierde su primer diente, los adultos dejan de entenderla. Emprende entonces un viaje por la isla de Tahití.",
@@ -69,7 +69,7 @@ export const FILMS = [
     },
     {
         id: 5,
-        src: "/images/demain.png",
+        src: "/images/demain.webp",
         title: "Demain, dès l'aube",
         description:
             "Matéo, un joven poeta del siglo XIX, siente que traiciona a su difunta esposa al comprometerse con otra mujer.",
@@ -103,7 +103,7 @@ export const FILMS = [
     },
     {
         id: 7,
-        src: "../previews/photo1.jpg",
+        src: "../previews/photo1.webp",
         title: "Femenina",
         description:
             "Exploración sobre cómo se construye la feminidad en distintas etapas de la vida.",
