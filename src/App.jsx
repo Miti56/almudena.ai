@@ -28,7 +28,7 @@ export default function CameraPortfolio() {
     const [powerOn, setPowerOn] = useState(true);
 
     // Navigation State
-    const [osdMode, setOsdMode] = useState(0);
+    const [osdMode, setOsdMode] = useState(2); //CHANGE TO 0 to have the VIEWFINDER
     const [galleryFocusIndex, setGalleryFocusIndex] = useState(null); // CHANGED: Start as null
     const [gridMode, setGridMode] = useState(2);
 
