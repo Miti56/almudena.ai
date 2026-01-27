@@ -4,14 +4,14 @@ import Viewfinder from '../screen/Viewfinder';
 import Gallery from '../screen/Gallery';
 import FilmDetail from '../screen/FilmDetail';
 import SystemInfo from '../screen/SystemInfo';
-import StandbyScreensaver from '../screen/StandbyScreensaver'; // Ensure this path is correct
+import StandbyScreensaver from '../screen/StandbyScreensaver';
 import dirtImg from '../../assets/textures/001.webp';
+import { Play, Settings, Camera, AlertCircle } from 'lucide-react';
 
 export default function MonitorBody({
                                         powerOn,
                                         bootSequence,
                                         view,
-                                        osdMode,
                                         time,
                                         isRecording,
                                         formatTime,
@@ -114,7 +114,6 @@ export default function MonitorBody({
 
                             {/* Rolling Technical Log (Bottom) */}
                             <div className="mt-auto border-t border-zinc-800 pt-4 flex flex-col md:flex-row justify-between items-end gap-4">
-                                {/* The Log Output */}
                                 <div className="flex flex-col gap-1 w-full">
                                     <BootLine text="MOUNTING VIRTUAL LENS..." delay="200ms" />
                                     <BootLine text="CALIBRATING SENSOR [35MM]..." delay="600ms" />
@@ -125,7 +124,6 @@ export default function MonitorBody({
                                     </div>
                                 </div>
 
-                                {/* Credit */}
                                 <div className="min-w-max text-right animate-[fadeIn_0.5s_ease-out_1s_both]">
                                     <div className="text-[10px] md:text-xs text-zinc-600 uppercase tracking-widest mb-1">Architecture</div>
                                     <div className="text-xs md:text-sm text-zinc-400 font-bold">
@@ -134,7 +132,6 @@ export default function MonitorBody({
                                 </div>
                             </div>
 
-                            {/* CRT overlay effect just for boot */}
                             <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-50 bg-[length:100%_2px,3px_100%] pointer-events-none opacity-20"></div>
                         </div>
                     )}
@@ -144,16 +141,14 @@ export default function MonitorBody({
                     {/* 2. BACKGROUND LAYER (Screensaver/Webcam)  */}
                     {/* ========================================= */}
 
-                    {/* Option A: Webcam (if stream exists) */}
                     {webcamStream ? (
                         <video
                             ref={videoRef}
+                            // UPDATED: Simplified className, removed osdMode check
                             className={`absolute transition-all duration-700 ease-in-out object-cover border-zinc-800
                             ${view !== 'viewfinder'
                                 ? 'scale-110 inset-0 w-full h-full blur-md brightness-50'
-                                : osdMode === 3
-                                    ? 'top-8 left-8 w-[35%] aspect-video border border-white/20 shadow-2xl z-10 rounded-sm'
-                                    : 'inset-0 scale-100 border-0 w-full h-full'
+                                : 'inset-0 scale-100 border-0 w-full h-full'
                             }`}
                             autoPlay
                             loop
@@ -162,7 +157,6 @@ export default function MonitorBody({
                             style={{ transform: 'scaleX(-1)' }}
                         />
                     ) : (
-                        /* Option B: Standby Screensaver (Default) */
                         <div className={`absolute inset-0 w-full h-full transition-all duration-700 ${view !== 'viewfinder' ? 'blur-sm brightness-50' : ''}`}>
                             <StandbyScreensaver active={powerOn && !bootSequence} />
                         </div>
@@ -175,16 +169,44 @@ export default function MonitorBody({
                     <div className="relative z-10 h-full">
                         {powerOn && !bootSequence && (
                             <>
-                                {/* Navigation Toast Hint */}
+                                {/* Navigation Toast / Help Overlay */}
                                 {navHint && (
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/80 border border-green-500/50 text-green-500 px-4 py-2 rounded shadow-2xl backdrop-blur-md z-50 animate-in fade-in zoom-in duration-200 pointer-events-none">
-                                        <span className="font-camera text-sm md:text-lg tracking-widest">{navHint}</span>
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none">
+                                        {navHint === 'HELP_MENU' ? (
+                                            // --- DETAILED HELP MENU ---
+                                            <div className="bg-black/80 border border-white/20 px-6 py-4 rounded shadow-2xl backdrop-blur-md animate-in fade-in zoom-in duration-200 flex flex-col gap-3 min-w-[240px]">
+                                                <div className="text-[10px] text-zinc-500 font-bold tracking-widest border-b border-white/10 pb-2 mb-1">
+                                                    COMMAND LIST
+                                                </div>
+
+                                                <div className="flex items-center gap-3 text-white/80">
+                                                    <Play size={16} />
+                                                    <span className="font-camera tracking-widest text-sm"> PRESS FOR GALLERY VIEW</span>
+                                                </div>
+
+                                                <div className="flex items-center gap-3 text-white/80">
+                                                    <Settings size={16} />
+                                                    <span className="font-camera tracking-widest text-sm">PRESS FOR ARTIST INFO</span>
+                                                </div>
+
+                                                <div className="flex items-center gap-3 text-white/80">
+                                                    <Camera size={16} />
+                                                    <span className="font-camera tracking-widest text-sm">PRESS FOR SELFIE MODE</span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            // --- STANDARD TOAST MESSAGE ---
+                                            <div className="bg-black/80 border border-green-500/50 text-green-500 px-4 py-2 rounded shadow-2xl backdrop-blur-md animate-in fade-in zoom-in duration-200">
+                                                <span className="font-camera text-sm md:text-lg tracking-widest">{navHint}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
                                 {view === 'viewfinder' && (
                                     <div className="absolute inset-0 p-2 md:p-6 flex flex-col justify-between">
-                                        <Viewfinder osdMode={osdMode} time={time} formatTime={formatTime} />
+                                        {/* UPDATED: Hardcoded osdMode to 2 (standard view) */}
+                                        <Viewfinder osdMode={2} time={time} formatTime={formatTime} />
                                     </div>
                                 )}
                                 {view === 'gallery' && (
@@ -199,7 +221,11 @@ export default function MonitorBody({
                                 {view === 'detail' && (
                                     <FilmDetail selectedFilm={selectedFilm} handleBack={handleBack} />
                                 )}
-                                <SystemInfo isVisible={view === 'info'} handleBack={handleBack} />
+
+                                {/* UPDATED: Pass isVisible={true} so it shows up immediately */}
+                                {view === 'info' && (
+                                    <SystemInfo isVisible={true} handleBack={handleBack} />
+                                )}
                             </>
                         )}
                     </div>
@@ -207,13 +233,14 @@ export default function MonitorBody({
                     {/* ========================================= */}
                     {/* 4. PHYSICAL OVERLAYS (Dirt, Scanlines)    */}
                     {/* ========================================= */}
-                    {osdMode !== 3 && (
-                        <div className="absolute inset-0 z-20 pointer-events-none">
-                            <div className="absolute inset-0 scanline opacity-10"></div>
-                            <div className="absolute inset-0 screen-pixel opacity-10"></div>
-                            <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_50%,rgba(0,0,0,0.4)_100%)]"></div>
-                        </div>
-                    )}
+
+                    {/* UPDATED: Removed the {osdMode !== 3} check. Scanlines are always on now. */}
+                    <div className="absolute inset-0 z-20 pointer-events-none">
+                        <div className="absolute inset-0 scanline opacity-10"></div>
+                        <div className="absolute inset-0 screen-pixel opacity-10"></div>
+                        <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_50%,rgba(0,0,0,0.4)_100%)]"></div>
+                    </div>
+
                     <div className="absolute inset-0 pointer-events-none z-40" style={{ backgroundImage: `url(${dirtImg})`, backgroundSize: 'cover', backgroundPosition: 'center', mixBlendMode: 'screen', opacity: 0.3 }}></div>
                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none rounded-sm z-50"></div>
                 </div>

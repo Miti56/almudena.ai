@@ -35,7 +35,7 @@ export const FILMS = [
     },
     {
         id: 3,
-        src: "/images/grito.webp",
+        src: "/images/grito2.webp",
         title: "UN CRI DANS LE VIDE, UN DEUIL EN SILENCE",
         description:
             "Dos compañeros de piso atraviesan las distintas fases del duelo tras el suicidio de uno de sus mejores amigos.",
@@ -47,12 +47,12 @@ export const FILMS = [
         runtime: "6m",
         res: "1080p MP4",
         size: "1.2 GB",
-        role: "Directora de Fotografía / Montadora",
+        role: "Directora / Montadora",
         color: "from-blue-900 to-slate-900",
     },
     {
         id: 4,
-        src: "/images/tamahine.webp",
+        src: "/images/tamahine2.webp",
         title: "TAMAHINE ITI",
         description:
             "Cuando una niña pierde su primer diente, los adultos dejan de entenderla. Emprende entonces un viaje por la isla de Tahití.",

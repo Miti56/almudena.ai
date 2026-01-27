@@ -5,20 +5,6 @@ import MonitorBody from './components/layout/MonitorBody';
 import GripControls from './components/layout/GripControls';
 
 export default function CameraPortfolio() {
-    // const ACCESS_TOKEN = 'test';
-    //
-    // const params = new URLSearchParams(window.location.search);
-    // const allowed =
-    //     location.hostname === 'localhost' || params.get('access') === ACCESS_TOKEN;
-    //     //params.get('access') === ACCESS_TOKEN;
-    //
-    // if (!allowed) {
-    //     return (
-    //         <div className="min-h-screen flex items-center justify-center bg-black text-white">
-    //             <h1 className="text-xl font-semibold">Access restricted</h1>
-    //         </div>
-    //     );
-    // }
     const [view, setView] = useState('viewfinder');
     const [selectedFilm, setSelectedFilm] = useState(null);
     const [time, setTime] = useState(new Date());
@@ -28,14 +14,13 @@ export default function CameraPortfolio() {
     const [powerOn, setPowerOn] = useState(true);
 
     // Navigation State
-    const [osdMode, setOsdMode] = useState(2); //CHANGE TO 0 to have the VIEWFINDER
-    const [galleryFocusIndex, setGalleryFocusIndex] = useState(null); // CHANGED: Start as null
+    const [galleryFocusIndex, setGalleryFocusIndex] = useState(null);
     const [gridMode, setGridMode] = useState(2);
 
     // New Features State
     const [isSelfieMode, setIsSelfieMode] = useState(false);
     const [webcamStream, setWebcamStream] = useState(null);
-    const [navHint, setNavHint] = useState(null); // For UI instructions
+    const [navHint, setNavHint] = useState(null);
 
     // Clock
     useEffect(() => {
@@ -55,6 +40,22 @@ export default function CameraPortfolio() {
         return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
     };
 
+    // --- Helper: Show All Instructions ---
+    const showInstructions = () => {
+        setNavHint('HELP_MENU');
+        setTimeout(() => setNavHint(null), 3500);
+    };
+
+    // --- Helper: Stop Selfie Mode Cleanly ---
+    // We use this to ensure the webcam is turned off whenever we leave the mode
+    const stopSelfieMode = () => {
+        if (webcamStream) {
+            webcamStream.getTracks().forEach(track => track.stop());
+        }
+        setWebcamStream(null);
+        setIsSelfieMode(false);
+    };
+
     const togglePower = () => {
         if (!powerOn) {
             setBootSequence(true);
@@ -63,29 +64,24 @@ export default function CameraPortfolio() {
         } else {
             setIsRecording(false);
             setPowerOn(false);
-            // Stop webcam if on
-            if (webcamStream) {
-                webcamStream.getTracks().forEach(track => track.stop());
-                setWebcamStream(null);
-                setIsSelfieMode(false);
-            }
+            stopSelfieMode(); // Use helper
         }
     };
 
-    // --- NEW: Selfie Logic ---
+    // --- Selfie Logic ---
     const toggleSelfie = async () => {
         if (!powerOn) return;
 
         if (isSelfieMode) {
             // Turn off
-            if (webcamStream) {
-                webcamStream.getTracks().forEach(track => track.stop());
-            }
-            setWebcamStream(null);
-            setIsSelfieMode(false);
+            stopSelfieMode();
             setNavHint("LENS INPUT ACTIVE");
         } else {
             // Turn on
+            // Ensure we are in viewfinder first
+            setView('viewfinder');
+            setSelectedFilm(null);
+
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 setWebcamStream(stream);
@@ -96,7 +92,6 @@ export default function CameraPortfolio() {
                 setNavHint("CAMERA ACCESS DENIED");
             }
         }
-        // Clear hint after 2s
         setTimeout(() => setNavHint(null), 2000);
     };
 
@@ -110,28 +105,50 @@ export default function CameraPortfolio() {
     }, [powerOn]);
 
     const toggleGallery = () => {
+        // UPDATED: Check for selfie mode and stop it
+        if (isSelfieMode) {
+            stopSelfieMode();
+        }
+
         if (view === 'gallery' || view === 'detail') {
             setView('viewfinder');
             setSelectedFilm(null);
         } else {
             setView('gallery');
-            setGalleryFocusIndex(null); // Reset selection when opening
+            setGalleryFocusIndex(null);
         }
     };
 
     const toggleInfo = () => {
+        // UPDATED: Check for selfie mode and stop it
+        if (isSelfieMode) {
+            stopSelfieMode();
+        }
+
         setView(prev => prev === 'info' ? 'viewfinder' : 'info');
     };
 
     const handleDispBack = () => {
-        if (view === 'viewfinder') {
-            setOsdMode((prev) => (prev + 1) % 4);
-        } else if (view === 'detail') {
+        // 1. If Selfie Mode is ON, turn it OFF
+        if (isSelfieMode) {
+            stopSelfieMode(); // Use helper
+            setNavHint("LENS INPUT ACTIVE");
+            setTimeout(() => setNavHint(null), 2000);
+            return;
+        }
+
+        // 2. Standard Navigation
+        if (view === 'detail') {
             setView('gallery');
             setSelectedFilm(null);
-        } else {
+        }
+        else if (view !== 'viewfinder') {
             setView('viewfinder');
             setSelectedFilm(null);
+        }
+        // 3. If in Viewfinder (Main Menu), Show Help Overlay
+        else if (view === 'viewfinder') {
+            showInstructions();
         }
     };
 
@@ -139,18 +156,15 @@ export default function CameraPortfolio() {
         setGridMode(prev => prev === 2 ? 3 : 2);
     };
 
-    // Updated D-Pad Logic
     const handleDirection = (dir) => {
-        // 1. Viewfinder Mode: Show Instructions
+        // 1. Viewfinder Mode: Show Help Overlay
         if (view === 'viewfinder') {
-            setNavHint("PRESS [PLAY] FOR GALLERY");
-            setTimeout(() => setNavHint(null), 2000);
+            showInstructions();
             return;
         }
 
         // 2. Gallery Mode: Selection Logic
         if (view === 'gallery') {
-            // If nothing is selected yet, select the first one on any key press
             if (galleryFocusIndex === null) {
                 setGalleryFocusIndex(0);
                 return;
@@ -170,10 +184,9 @@ export default function CameraPortfolio() {
         if (view === 'gallery' && galleryFocusIndex !== null) {
             setSelectedFilm(FILMS[galleryFocusIndex]);
             setView('detail');
-        } else if (view === 'viewfinder') {
-            // Take photo logic could go here
-            setNavHint("IMAGE CAPTURED");
-            setTimeout(() => setNavHint(null), 1000);
+        }
+        else if (view === 'viewfinder') {
+            showInstructions();
         }
     };
 
@@ -192,7 +205,6 @@ export default function CameraPortfolio() {
                     powerOn={powerOn}
                     bootSequence={bootSequence}
                     view={view}
-                    osdMode={osdMode}
                     time={time}
                     isRecording={isRecording}
                     formatTime={formatTime}
@@ -202,9 +214,9 @@ export default function CameraPortfolio() {
                     selectFilm={selectFilm}
                     selectedFilm={selectedFilm}
                     handleBack={handleDispBack}
-                    webcamStream={webcamStream} // Pass stream
-                    navHint={navHint} // Pass hint
-                    toggleSelfie={toggleSelfie} // Pass toggle
+                    webcamStream={webcamStream}
+                    navHint={navHint}
+                    toggleSelfie={toggleSelfie}
                 />
 
                 <GripControls
@@ -214,8 +226,8 @@ export default function CameraPortfolio() {
                     toggleGallery={toggleGallery}
                     toggleInfo={toggleInfo}
                     togglePower={togglePower}
-                    toggleSelfie={toggleSelfie} // NEW PROP
-                    isSelfieMode={isSelfieMode} // NEW PROP
+                    toggleSelfie={toggleSelfie}
+                    isSelfieMode={isSelfieMode}
                     handleDispBack={handleDispBack}
                     activeButton={activeButton}
                     view={view}

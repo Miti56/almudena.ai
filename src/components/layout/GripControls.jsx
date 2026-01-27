@@ -69,9 +69,10 @@ export default function GripControls({
                 <RoundButton
                     name="info"
                     label="Back"
-                    icon={view === 'viewfinder' ? Info : CornerUpLeft}
+                    icon={view === 'viewfinder' && !isSelfieMode ? Info : CornerUpLeft} // Show 'Back' arrow if in selfie mode
                     onClick={() => handlePress('info', handleDispBack)}
-                    active={view === 'info'}
+                    // LIGHT UP IF: Not in viewfinder OR Selfie Mode is Active
+                    active={view !== 'viewfinder' || isSelfieMode}
                     activeButton={activeButton}
                 />
                 <RoundButton
