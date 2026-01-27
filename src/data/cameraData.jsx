@@ -30,7 +30,7 @@ export const FILMS = [
         runtime: "7m",
         res: "1080p RAW",
         size: "8.4 GB",
-        role: "Directora",
+        role: "Directora / Guionista",
         color: "from-emerald-900 to-teal-900",
     },
     {
