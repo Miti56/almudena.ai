@@ -1,6 +1,69 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Play, Info, Settings, Power, CornerUpLeft, Camera } from 'lucide-react';
 import RoundButton from '../ui/RoundButton';
+
+function VirtualJoystick({ onDirection, onOk }) {
+    const [knobPos, setKnobPos] = useState({ x: 0, y: 0 });
+    const startPos = useRef(null);
+    const maxRadius = 26;
+    const threshold = 12;
+
+    const handleTouchStart = (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        startPos.current = { x: touch.clientX, y: touch.clientY };
+    };
+
+    const handleTouchMove = (e) => {
+        e.preventDefault();
+        if (!startPos.current) return;
+        const touch = e.touches[0];
+        const dx = touch.clientX - startPos.current.x;
+        const dy = touch.clientY - startPos.current.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > maxRadius) {
+            const scale = maxRadius / dist;
+            setKnobPos({ x: dx * scale, y: dy * scale });
+        } else {
+            setKnobPos({ x: dx, y: dy });
+        }
+    };
+
+    const handleTouchEnd = (e) => {
+        e.preventDefault();
+        const { x, y } = knobPos;
+        if (Math.abs(x) < threshold && Math.abs(y) < threshold) {
+            onOk();
+        } else if (Math.abs(x) > Math.abs(y)) {
+            onDirection(x > 0 ? 'right' : 'left');
+        } else {
+            onDirection(y > 0 ? 'down' : 'up');
+        }
+        setKnobPos({ x: 0, y: 0 });
+        startPos.current = null;
+    };
+
+    return (
+        <div
+            className="relative w-24 h-24 rounded-full bg-[#181818] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),0_1px_1px_rgba(255,255,255,0.05)] border border-black/50 flex items-center justify-center touch-none select-none"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
+            <div className="absolute inset-2 rounded-full bg-gradient-to-b from-black to-[#222]"></div>
+            <ChevronUp size={12} className="absolute top-1 left-1/2 -translate-x-1/2 text-zinc-600" />
+            <ChevronDown size={12} className="absolute bottom-1 left-1/2 -translate-x-1/2 text-zinc-600" />
+            <ChevronLeft size={12} className="absolute left-1 top-1/2 -translate-y-1/2 text-zinc-600" />
+            <ChevronRight size={12} className="absolute right-1 top-1/2 -translate-y-1/2 text-zinc-600" />
+            <div
+                className="relative z-10 w-10 h-10 rounded-full bg-[#333] border border-zinc-700 shadow-[0_3px_6px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.1)]"
+                style={{ transform: `translate(${knobPos.x}px, ${knobPos.y}px)` }}
+            >
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-zinc-600/20 to-transparent"></div>
+            </div>
+        </div>
+    );
+}
 
 export default function GripControls({
                                          handlePress,
@@ -34,26 +97,34 @@ export default function GripControls({
                 <span className="mt-3 text-[10px] font-sans font-bold text-zinc-600 tracking-widest uppercase text-shadow-sm">Multi-Function</span>
             </div>
 
-            {/* D-PAD */}
+            {/* D-PAD: Mobile = Virtual Joystick, Desktop = Physical D-Pad */}
             <div className="relative z-10 flex flex-col items-center pl-1 md:pl-0">
-                {/* CHANGED: w-24 h-24 on mobile (Smaller) */}
-                <div className="relative w-24 h-24 md:w-44 md:h-44 rounded-full bg-[#181818] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),0_1px_1px_rgba(255,255,255,0.05)] flex items-center justify-center p-1 border border-black/50">
+                {/* Mobile Joystick */}
+                <div className="md:hidden">
+                    <VirtualJoystick
+                        onDirection={(dir) => { handlePress(dir); handleDirection(dir); }}
+                        onOk={() => handlePress('ok', handleOk)}
+                    />
+                </div>
+
+                {/* Desktop D-Pad */}
+                <div className="hidden md:flex relative w-44 h-44 rounded-full bg-[#181818] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),0_1px_1px_rgba(255,255,255,0.05)] items-center justify-center p-1 border border-black/50">
                     <div className="absolute inset-2 rounded-full bg-gradient-to-b from-black to-[#222] shadow-inner"></div>
 
                     <button onClick={() => { handlePress('up'); handleDirection('up'); }}
-                            className={`absolute top-1 md:top-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'up' ? 'text-green-500 scale-95' : ''}`}><ChevronUp size={20} className="md:w-8 md:h-8" /></button>
+                            className={`absolute top-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'up' ? 'text-green-500 scale-95' : ''}`}><ChevronUp size={32} /></button>
                     <button onClick={() => { handlePress('down'); handleDirection('down'); }}
-                            className={`absolute bottom-1 md:bottom-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'down' ? 'text-green-500 scale-95' : ''}`}><ChevronDown size={20} className="md:w-8 md:h-8" /></button>
+                            className={`absolute bottom-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'down' ? 'text-green-500 scale-95' : ''}`}><ChevronDown size={32} /></button>
                     <button onClick={() => { handlePress('left'); handleDirection('left'); }}
-                            className={`absolute left-1 md:left-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'left' ? 'text-green-500 scale-95' : ''}`}><ChevronLeft size={20} className="md:w-8 md:h-8" /></button>
+                            className={`absolute left-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'left' ? 'text-green-500 scale-95' : ''}`}><ChevronLeft size={32} /></button>
                     <button onClick={() => { handlePress('right'); handleDirection('right'); }}
-                            className={`absolute right-1 md:right-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'right' ? 'text-green-500 scale-95' : ''}`}><ChevronRight size={20} className="md:w-8 md:h-8" /></button>
+                            className={`absolute right-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'right' ? 'text-green-500 scale-95' : ''}`}><ChevronRight size={32} /></button>
 
                     <button onClick={() => { handlePress('ok', handleOk); }}
                             className={`
-                       relative w-10 h-10 md:w-20 md:h-20 rounded-full bg-[#222] 
-                       shadow-[0_3px_5px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] 
-                       border border-black flex items-center justify-center text-[8px] md:text-sm font-bold text-zinc-300 tracking-wider
+                       relative w-20 h-20 rounded-full bg-[#222]
+                       shadow-[0_3px_5px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)]
+                       border border-black flex items-center justify-center text-sm font-bold text-zinc-300 tracking-wider
                        transition-all active:shadow-[inset_0_2px_5px_rgba(0,0,0,0.8)] active:translate-y-[1px]
                        ${activeButton === 'ok' ? 'bg-black text-green-500 shadow-inner' : 'hover:bg-[#2a2a2a]'}
                      `}
@@ -64,14 +135,12 @@ export default function GripControls({
             </div>
 
             {/* BUTTONS */}
-            {/* CHANGED: Tighter gap, adjusted grid for compact strip */}
-            <div className="grid grid-cols-3 md:grid-cols-2 gap-x-2 gap-y-2 md:gap-8 relative z-10 w-full px-1 justify-items-center">
+            <div className="grid grid-cols-5 md:grid-cols-2 gap-x-1 gap-y-2 md:gap-8 relative z-10 md:w-full px-1 justify-items-center">
                 <RoundButton
                     name="info"
                     label="Back"
-                    icon={view === 'viewfinder' && !isSelfieMode ? Info : CornerUpLeft} // Show 'Back' arrow if in selfie mode
+                    icon={view === 'viewfinder' && !isSelfieMode ? Info : CornerUpLeft}
                     onClick={() => handlePress('info', handleDispBack)}
-                    // LIGHT UP IF: Not in viewfinder OR Selfie Mode is Active
                     active={view !== 'viewfinder' || isSelfieMode}
                     activeButton={activeButton}
                 />
@@ -99,17 +168,15 @@ export default function GripControls({
                     active={view === 'info'}
                     activeButton={activeButton}
                 />
-                <div className="col-span-2 md:col-span-2 flex justify-center w-full">
-                    <RoundButton
-                        name="power"
-                        label="Pwr"
-                        icon={Power}
-                        danger={true}
-                        onClick={togglePower}
-                        active={powerOn}
-                        activeButton={activeButton}
-                    />
-                </div>
+                <RoundButton
+                    name="power"
+                    label="Pwr"
+                    icon={Power}
+                    danger={true}
+                    onClick={togglePower}
+                    active={powerOn}
+                    activeButton={activeButton}
+                />
             </div>
 
             <div className="hidden md:block absolute bottom-6 text-center z-10 opacity-30">

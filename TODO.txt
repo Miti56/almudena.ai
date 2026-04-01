@@ -2,11 +2,11 @@
 -Power does not turn off completly the camera, I can still see some of the video playing in the background (gamma?)
 -Power should bring the website to the index, like a real turn off would do.
 -On mobile would be easier to use like a joytic instead of buttons. Small size make it hard tgo click, while a small joystic would make it easier to use.
--All the views are very optimised for 16:9 or phone aspect ratios. iPad or similar (810x0180P) breaks
-    -Mostly Operator screen (side scroll needed)
-    -Viewfinder is a mess, everything is squished in both orientations of an ipad
-    -In landscape mode, in gallery, the video is completluy squished.
 -Improve aluminium texture, buttons very high resolution, right side also, but screen borders dont look sharp.
 -Screws look to fake, they do not cross properly making the ilusion go away, when zoomed in it does not work. Screw doesnt move exactly with my zoom breaking ilusion.
 ================== IDEAS ==================
 -Add better indication that the camera is off? Maybe chartgin symbol? Waitingfor user input?
+
+On mobile make the buttons take less space, only taking one line, to have more real state for content
+
+Touching the viewfinder (not the buttons) should skeep to the next preview

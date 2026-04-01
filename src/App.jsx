@@ -64,7 +64,9 @@ export default function CameraPortfolio() {
         } else {
             setIsRecording(false);
             setPowerOn(false);
-            stopSelfieMode(); // Use helper
+            setView('viewfinder');
+            setSelectedFilm(null);
+            stopSelfieMode();
         }
     };
 

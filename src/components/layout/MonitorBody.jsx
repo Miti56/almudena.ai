@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import Screw from '../ui/Screw';
 import Viewfinder from '../screen/Viewfinder';
 import Gallery from '../screen/Gallery';
@@ -26,6 +26,7 @@ export default function MonitorBody({
                                     }) {
 
     const videoRef = useRef(null);
+    const [previewAdvance, setPreviewAdvance] = useState(0);
 
     // Handle Webcam Stream Lifecycle
     useEffect(() => {
@@ -144,7 +145,6 @@ export default function MonitorBody({
                     {webcamStream ? (
                         <video
                             ref={videoRef}
-                            // UPDATED: Simplified className, removed osdMode check
                             className={`absolute transition-all duration-700 ease-in-out object-cover border-zinc-800
                             ${view !== 'viewfinder'
                                 ? 'scale-110 inset-0 w-full h-full blur-md brightness-50'
@@ -156,11 +156,11 @@ export default function MonitorBody({
                             playsInline
                             style={{ transform: 'scaleX(-1)' }}
                         />
-                    ) : (
+                    ) : powerOn ? (
                         <div className={`absolute inset-0 w-full h-full transition-all duration-700 ${view !== 'viewfinder' ? 'blur-sm brightness-50' : ''}`}>
-                            <StandbyScreensaver active={powerOn && !bootSequence} />
+                            <StandbyScreensaver active={!bootSequence} advanceTrigger={previewAdvance} />
                         </div>
-                    )}
+                    ) : null}
 
 
                     {/* ========================================= */}
@@ -204,8 +204,10 @@ export default function MonitorBody({
                                 )}
 
                                 {view === 'viewfinder' && (
-                                    <div className="absolute inset-0 p-2 md:p-6 flex flex-col justify-between">
-                                        {/* UPDATED: Hardcoded osdMode to 2 (standard view) */}
+                                    <div
+                                        className="absolute inset-0 p-2 md:p-6 flex flex-col justify-between cursor-pointer"
+                                        onClick={() => setPreviewAdvance(p => p + 1)}
+                                    >
                                         <Viewfinder osdMode={2} time={time} formatTime={formatTime} />
                                     </div>
                                 )}
@@ -260,7 +262,7 @@ export default function MonitorBody({
 
             {/* REC LIGHT */}
             {powerOn && (
-                <div className={`absolute top-4 right-4 md:top-6 md:right-6 z-30 flex items-center gap-2 transition-opacity duration-300 ${isRecording ? 'opacity-100' : 'opacity-20'}`}>
+                <div className={`absolute top-4 right-4 md:top-6 md:right-6 z-30 hidden md:flex items-center gap-2 transition-opacity duration-300 ${isRecording ? 'opacity-100' : 'opacity-20'}`}>
                     <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,1)] animate-pulse border border-black/50"></div>
                 </div>
             )}

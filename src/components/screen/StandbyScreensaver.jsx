@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { FILMS } from '../../data/cameraData';
 
-export default function StandbyScreensaver({ active }) {
+export default function StandbyScreensaver({ active, advanceTrigger }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [timecode, setTimecode] = useState("00:00:00:00");
+
+    // Manual skip via tap
+    useEffect(() => {
+        if (!advanceTrigger) return;
+        setCurrentIndex((prev) => (prev + 1) % FILMS.length);
+    }, [advanceTrigger]);
 
     // Cycle through films
     useEffect(() => {
