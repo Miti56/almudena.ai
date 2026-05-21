@@ -15,24 +15,13 @@ export default function FilmDetail({ selectedFilm, handleBack }) {
             {/* Added min-h-full to ensure it fills screen, but p-4 allows scrolling content */}
             <div className="min-h-full lg:h-full flex flex-col lg:flex-row gap-6 p-4 md:p-8">
 
-                {/* LEFT: Video Player */}
+                // LEFT: Video Player
                 <div className="w-full lg:flex-1 flex flex-col justify-center shrink-0 min-h-[250px] lg:min-h-0">
                     <div
                         className={`relative w-full aspect-video bg-black rounded-lg border border-white/10 shadow-2xl overflow-hidden group ${
-                            canPlay ? 'cursor-pointer' : 'cursor-not-allowed'
+                            !canPlay ? 'cursor-not-allowed' : ''
                         }`}
-                        onClick={() => {
-                            if (!canPlay) return;
-
-                            const video = videoRef.current;
-                            if (!video) return;
-
-                            if (video.paused) {
-                                video.play();
-                            } else {
-                                video.pause();
-                            }
-                        }}
+                        // Removed the conflicting onClick handler here
                     >
                         {/* Video Element */}
                         <video
@@ -42,16 +31,18 @@ export default function FilmDetail({ selectedFilm, handleBack }) {
                             className="w-full h-full object-cover"
                             preload="metadata"
                             controls={true}
+                            playsInline // CRITICAL: Forces Safari to allow inline playback
                             onPlay={() => setIsPlaying(true)}
                             onPause={() => setIsPlaying(false)}
                         />
 
                         {/* Dark overlay */}
+                        {/* pointer-events-none ensures this doesn't block clicks to the native controls */}
                         <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors pointer-events-none" />
 
                         {/* Disabled state */}
                         {!canPlay && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10">
                 <span className="text-white/40 text-xs uppercase tracking-widest font-mono">
                     No video available
                 </span>
@@ -59,7 +50,7 @@ export default function FilmDetail({ selectedFilm, handleBack }) {
                         )}
 
                         {/* Label */}
-                        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] text-white font-mono border border-white/10">
+                        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] text-white font-mono border border-white/10 pointer-events-none">
                             RAW PREVIEW
                         </div>
                     </div>
