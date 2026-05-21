@@ -50,17 +50,6 @@ export default function FilmDetail({ selectedFilm, handleBack }) {
                         {/* Dark overlay */}
                         <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors pointer-events-none" />
 
-                        {/*/!* Play indicator *!/*/}
-                        {/*{canPlay && !isPlaying && (*/}
-                        {/*    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">*/}
-                        {/*        <Play*/}
-                        {/*            size={64}*/}
-                        {/*            className="text-white/90 drop-shadow-xl group-hover:scale-110 transition-transform"*/}
-                        {/*            fill="currentColor"*/}
-                        {/*        />*/}
-                        {/*    </div>*/}
-                        {/*)}*/}
-
                         {/* Disabled state */}
                         {!canPlay && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black/60">
