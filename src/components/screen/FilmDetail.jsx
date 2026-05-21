@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Play, X, Clapperboard, CornerUpLeft } from 'lucide-react';
 
+
 export default function FilmDetail({ selectedFilm, handleBack }) {
+    const videoRef = useRef(null);
     if (!selectedFilm) return null;
+    const [isPlaying, setIsPlaying] = React.useState(false);
+    const canPlay = selectedFilm?.url && selectedFilm.url !== 'n/a';
+
 
     return (
         // Added overflow-y-auto for mobile scrolling, lg:overflow-hidden to lock it on desktop
@@ -12,18 +17,60 @@ export default function FilmDetail({ selectedFilm, handleBack }) {
             <div className="min-h-full lg:h-full flex flex-col lg:flex-row gap-6 p-4 md:p-8">
 
                 {/* LEFT: Video Player */}
-                {/* Added shrink-0 and min-h-[250px] so it never vanishes on mobile */}
                 <div className="w-full lg:flex-1 flex flex-col justify-center shrink-0 min-h-[250px] lg:min-h-0">
-                    <div className="relative w-full aspect-video bg-black rounded-lg border border-white/10 shadow-2xl overflow-hidden group">
-                        <div className="absolute inset-0 bg-cover bg-center opacity-80" style={{ backgroundImage: `url(${selectedFilm.src})` }}></div>
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <Play size={64} className="text-white/90 drop-shadow-xl hover:scale-110 transition-transform cursor-pointer" fill="currentColor" />
-                        </div>
-                        {/* Fake Timeline */}
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-                            <div className="w-1/3 h-full bg-green-500"></div>
-                        </div>
+                    <div
+                        className={`relative w-full aspect-video bg-black rounded-lg border border-white/10 shadow-2xl overflow-hidden group ${
+                            canPlay ? 'cursor-pointer' : 'cursor-not-allowed'
+                        }`}
+                        onClick={() => {
+                            if (!canPlay) return;
+
+                            const video = videoRef.current;
+                            if (!video) return;
+
+                            if (video.paused) {
+                                video.play();
+                            } else {
+                                video.pause();
+                            }
+                        }}
+                    >
+                        {/* Video Element */}
+                        <video
+                            ref={videoRef}
+                            src={canPlay ? selectedFilm.url : undefined}
+                            poster={selectedFilm.src}
+                            className="w-full h-full object-cover"
+                            preload="metadata"
+                            controls={true}
+                            onPlay={() => setIsPlaying(true)}
+                            onPause={() => setIsPlaying(false)}
+                        />
+
+                        {/* Dark overlay */}
+                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors pointer-events-none" />
+
+                        {/*/!* Play indicator *!/*/}
+                        {/*{canPlay && !isPlaying && (*/}
+                        {/*    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">*/}
+                        {/*        <Play*/}
+                        {/*            size={64}*/}
+                        {/*            className="text-white/90 drop-shadow-xl group-hover:scale-110 transition-transform"*/}
+                        {/*            fill="currentColor"*/}
+                        {/*        />*/}
+                        {/*    </div>*/}
+                        {/*)}*/}
+
+                        {/* Disabled state */}
+                        {!canPlay && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                <span className="text-white/40 text-xs uppercase tracking-widest font-mono">
+                    No video available
+                </span>
+                            </div>
+                        )}
+
+                        {/* Label */}
                         <div className="absolute top-4 right-4 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] text-white font-mono border border-white/10">
                             RAW PREVIEW
                         </div>
