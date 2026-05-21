@@ -127,7 +127,6 @@ export const FILMS = [
     },
 ];
 
-
 export const SKILLS = [
     "Cinematografía", "Corrección de Color", "Diseño de Iluminación", "Dirección", "Edición (Premiere/Resolve)"
 ];
