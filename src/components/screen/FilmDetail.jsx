@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import { Play, X, Clapperboard, CornerUpLeft } from 'lucide-react';
 
-
 export default function FilmDetail({ selectedFilm, handleBack }) {
     const videoRef = useRef(null);
     if (!selectedFilm) return null;
