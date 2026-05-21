@@ -15,6 +15,7 @@ export const FILMS = [
         size: "14.2 GB",
         role: "Directora / Guionista",
         color: "from-purple-900 to-indigo-900",
+        url:"https://movies.almudena.art/Alas_de_Papel.mp4",
     },
     {
         id: 2,
@@ -32,6 +33,7 @@ export const FILMS = [
         size: "8.4 GB",
         role: "Directora / Guionista",
         color: "from-emerald-900 to-teal-900",
+        url:"https://movies.almudena.art/cuidalas_almudenaS.mp4",
     },
     {
         id: 3,
@@ -49,6 +51,7 @@ export const FILMS = [
         size: "1.2 GB",
         role: "Directora / Montadora",
         color: "from-blue-900 to-slate-900",
+        url:"https://movies.almudena.art/Un_cri_dans_le_vide_un_deuil_en_silence_2.mp4",
     },
     {
         id: 4,
@@ -66,6 +69,7 @@ export const FILMS = [
         size: "0.4 GB",
         role: "Directora",
         color: "from-orange-900 to-red-900",
+        url:"https://movies.almudena.art/TAMAHINE_ITI_VF.mp4",
     },
     {
         id: 5,
@@ -83,6 +87,7 @@ export const FILMS = [
         size: "6.8 GB",
         role: "Directora / Guionista",
         color: "from-slate-800 to-gray-900",
+        url:"https://movies.almudena.art/Demain.mp4",
     },
     {
         id: 6,
@@ -100,6 +105,7 @@ export const FILMS = [
         size: "0.7 GB",
         role: "Directora / Montadora",
         color: "from-neutral-800 to-zinc-900",
+        url:"https://movies.almudena.art/La_%C3%BAltima_funci%C3%B3n.mp4",
     },
     {
         id: 7,
@@ -117,6 +123,7 @@ export const FILMS = [
         size: "0.7 GB",
         role: "Directora / Montadora",
         color: "from-rose-900 to-fuchsia-900",
+        url:"n/a",
     },
 ];
 
@@ -128,7 +135,7 @@ export const SKILLS = [
 
 export const EXPERIENCE = [
     {
-        year: "Dic 2025 – Actualidad",
+        year: "Dic 2025 – May 2026",
         role: "Meritoria de Dirección",
         company: "Núcleo TV · Serie 'Furia' T2 (HBO)",
     },
