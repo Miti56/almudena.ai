@@ -74,6 +74,9 @@ export default function MonitorBody({
     const [capture, setCapture] = useState(null);
     const lastTick = useRef(shutterTick);
 
+    // The capture belongs to the selfie session: drop it as soon as selfie mode ends
+    if (capture && !isSelfieMode) setCapture(null);
+
     // Attach the webcam stream
     useEffect(() => {
         if (videoRef.current && webcamStream) {
@@ -181,9 +184,9 @@ export default function MonitorBody({
                     )}
 
                     {/* 4. Selfie capture thumbnail */}
-                    {capture && view === 'viewfinder' && (
+                    {capture && isSelfieMode && view === 'viewfinder' && (
                         <a
-                            key={capture.key}
+                            key={`capture-${capture.key}`}
                             href={capture.url}
                             download={`ALMUDENA_${String(capture.key).padStart(4, '0')}.jpg`}
                             className="absolute z-30 right-3 bottom-14 md:right-5 md:bottom-20 w-24 md:w-36 aspect-[4/3] rounded-[3px] overflow-hidden ring-2 ring-osd shadow-2xl group animate-[pop_0.5s_cubic-bezier(0.34,1.56,0.64,1)_0.2s_both]"
@@ -197,7 +200,7 @@ export default function MonitorBody({
 
                     {/* 5. Shutter flash + iris */}
                     {shutterTick > 0 && (
-                        <div key={shutterTick} className="absolute inset-0 z-[35] bg-white pointer-events-none" style={{ animation: 'flash 0.45s ease-out 0.12s both' }} />
+                        <div key={`flash-${shutterTick}`} className="absolute inset-0 z-[35] bg-white pointer-events-none" style={{ animation: 'flash 0.45s ease-out 0.12s both' }} />
                     )}
                     <Iris open={live} snapKey={shutterTick} className="z-[36]" />
 
@@ -230,7 +233,7 @@ export default function MonitorBody({
                     {/* card-access lamp */}
                     <span className="flex items-center gap-2">
                         <span
-                            key={shutterTick}
+                            key={`lamp-${shutterTick}`}
                             className={`w-[6px] h-[6px] rounded-full ${powerOn ? 'bg-fuji' : 'bg-[#1d2a22]'}`}
                             style={powerOn ? { animation: 'blink 0.18s steps(1) 4', boxShadow: '0 0 6px rgba(47,211,122,0.7)' } : undefined}
                         />
