@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import useHistogram from '../../lib/useHistogram';
-import { simFor, evFor, fileNo, AUTOPLAY_MS } from '../../lib/camera';
+import { simFor, evFor, fileNo, AUTOPLAY_MS, FOCUS_MS } from '../../lib/camera';
 import { afBeep } from '../../lib/sfx';
 import Timecode from '../ui/Timecode';
 
@@ -125,7 +125,7 @@ function AudioMeters() {
 // Viewfinder OSD
 // ---------------------------------------------------------------------------
 
-export default function Viewfinder({ film, index, total, isSelfie, videoRef, frames, autoplay, onOpen, onPrev, onNext }) {
+export default function Viewfinder({ film, index, total, isSelfie, videoRef, frames, autoplay, onOpen, onPrev, onNext, onFocus }) {
     const sim = simFor(film);
     const ev = isSelfie ? 0 : evFor(film);
     const histogram = useHistogram(isSelfie ? null : film.src, videoRef, isSelfie);
@@ -142,13 +142,14 @@ export default function Viewfinder({ film, index, total, isSelfie, videoRef, fra
         timers.current.forEach(clearTimeout);
         const key = Date.now();
         setAf({ x, y, key, locked: false, filmId: film.id, selfie: isSelfie });
+        onFocus?.(x, y);
         timers.current = [
             setTimeout(() => {
                 setAf((a) => (a.key === key ? { ...a, locked: true } : a));
                 afBeep();
-            }, 280),
+            }, FOCUS_MS),
         ];
-        if (!isSelfie) timers.current.push(setTimeout(onOpen, 650));
+        if (!isSelfie) timers.current.push(setTimeout(onOpen, FOCUS_MS + 370));
     };
 
     const onPointerDown = (e) => {

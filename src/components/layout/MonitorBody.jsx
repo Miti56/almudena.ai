@@ -8,7 +8,18 @@ import LiveView from '../screen/LiveView';
 import BootScreen from '../screen/BootScreen';
 import Iris from '../ui/Iris';
 import { FILMS } from '../../data/cameraData';
+import { FOCUS_MS } from '../../lib/camera';
 import dirtImg from '../../assets/textures/001.webp';
+
+// Contrast-detect AF hunt: the lens racks soft, passes through focus, overshoots a touch and settles.
+// The slight scale is focus breathing, centred on the AF point.
+const FOCUS_HUNT = [
+    { filter: 'blur(0px)', transform: 'scale(1)' },
+    { filter: 'blur(6px)', transform: 'scale(1.025)', offset: 0.3 },
+    { filter: 'blur(0.5px)', transform: 'scale(1.006)', offset: 0.6 },
+    { filter: 'blur(2px)', transform: 'scale(1.012)', offset: 0.75 },
+    { filter: 'blur(0px)', transform: 'scale(1)' },
+];
 
 const HELP = [
     ['◀ ▶', 'Cambiar película'],
@@ -71,6 +82,7 @@ export default function MonitorBody({
     setInfoTab,
 }) {
     const videoRef = useRef(null);
+    const feedRef = useRef(null);
     const [capture, setCapture] = useState(null);
     const lastTick = useRef(shutterTick);
 
@@ -112,6 +124,14 @@ export default function MonitorBody({
         return () => clearTimeout(t);
     }, [capture]);
 
+    // Rack the sensor feed through focus when the viewfinder is tapped
+    const rackFocus = (x, y) => {
+        const feed = feedRef.current;
+        if (!feed || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        feed.style.transformOrigin = `${x}% ${y}%`;
+        feed.animate(FOCUS_HUNT, { duration: FOCUS_MS, easing: 'ease-in-out' });
+    };
+
     const live = powerOn && !bootSequence;
     const film = FILMS[liveIndex];
 
@@ -122,18 +142,20 @@ export default function MonitorBody({
                 {/* ---------------- LCD ---------------- */}
                 <div className="relative flex-1 min-h-0 bg-black overflow-hidden lcd-glass md:rounded-[8px] md:ring-1 md:ring-black md:shadow-[0_0_0_3px_#0b0b0b,0_0_0_4px_rgba(255,255,255,0.06),inset_0_0_18px_rgba(0,0,0,0.9)]">
                     {/* 1. Sensor feed */}
-                    {webcamStream ? (
-                        <video
-                            ref={videoRef}
-                            className={`absolute inset-0 w-full h-full object-cover transition-[filter,transform] duration-700 ${view !== 'viewfinder' ? 'blur-md brightness-[0.35]' : ''}`}
-                            style={{ transform: 'scaleX(-1)' }}
-                            autoPlay
-                            muted
-                            playsInline
-                        />
-                    ) : (
-                        <LiveView index={liveIndex} active={live && view === 'viewfinder'} onNext={onLiveNext} dimmed={view !== 'viewfinder'} />
-                    )}
+                    <div ref={feedRef} className="absolute inset-0">
+                        {webcamStream ? (
+                            <video
+                                ref={videoRef}
+                                className={`absolute inset-0 w-full h-full object-cover transition-[filter,transform] duration-700 ${view !== 'viewfinder' ? 'blur-md brightness-[0.35]' : ''}`}
+                                style={{ transform: 'scaleX(-1)' }}
+                                autoPlay
+                                muted
+                                playsInline
+                            />
+                        ) : (
+                            <LiveView index={liveIndex} active={live && view === 'viewfinder'} onNext={onLiveNext} dimmed={view !== 'viewfinder'} />
+                        )}
+                    </div>
 
                     {/* 2. OSD & menus */}
                     {live && (
@@ -148,6 +170,7 @@ export default function MonitorBody({
                                     frames={frames}
                                     autoplay={!isSelfieMode}
                                     onOpen={openLive}
+                                    onFocus={rackFocus}
                                     onPrev={onLivePrev}
                                     onNext={onLiveNext}
                                 />

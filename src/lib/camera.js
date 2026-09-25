@@ -21,5 +21,8 @@ export const evFor = (film) => EV[(film.id - 1) % EV.length];
 // How long each film stays on the live view before advancing
 export const AUTOPLAY_MS = 7000;
 
+// Length of the tap-to-focus hunt; the AF box locks when it settles
+export const FOCUS_MS = 420;
+
 // Number of tabs in the INFO menu (SystemInfo), so the D-pad can page through them
 export const INFO_TAB_COUNT = 3;
