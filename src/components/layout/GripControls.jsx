@@ -253,7 +253,7 @@ export default function GripControls({
             </div>
 
             {/* ---------------- REAR / LEATHER ---------------- */}
-            <div className="relative flex-1 mat-leather flex flex-row md:flex-col items-center justify-between md:justify-start gap-4 md:gap-9 [@media(min-width:768px)_and_(max-height:800px)]:gap-5 px-5 pt-3 md:px-8 md:pt-10 [@media(min-width:768px)_and_(max-height:800px)]:pt-6 md:pb-6 border-t border-black md:border-t-0 md:border-l md:border-l-black/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:shadow-[inset_12px_0_18px_-10px_rgba(0,0,0,0.9)] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <div className="relative flex-1 mat-leather flex flex-row md:flex-col items-start md:items-center justify-between md:justify-start gap-4 md:gap-9 [@media(min-width:768px)_and_(max-height:800px)]:gap-5 px-5 pt-4 md:px-8 md:pt-10 [@media(min-width:768px)_and_(max-height:800px)]:pt-6 md:pb-6 border-t border-black md:border-t-0 md:border-l md:border-l-black/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:shadow-[inset_12px_0_18px_-10px_rgba(0,0,0,0.9)] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                 {/* Selector (desktop only; touch uses taps and swipes on the screen) */}
                 <div className="hidden md:block">
                     <SelectorPad onDirection={direction} onOk={ok} activeButton={activeButton} />
@@ -267,7 +267,7 @@ export default function GripControls({
                 </div>
 
                 {/* Shutter on touch layouts */}
-                <div className="md:hidden flex items-center gap-4 pt-1.5">
+                <div className="md:hidden flex items-center gap-4 -mt-[7px]">
                     <span className="w-px h-10 bg-white/[0.07] shadow-[1px_0_0_rgba(0,0,0,0.6)]" />
                     <ShutterButton compact powerOn={powerOn} onShutter={handleShutter} onPower={togglePower} />
                 </div>
