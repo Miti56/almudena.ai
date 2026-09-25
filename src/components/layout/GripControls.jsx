@@ -89,8 +89,8 @@ function ModeDial({ mode, onMode, disabled }) {
 
 function ShutterButton({ powerOn, onShutter, onPower, compact = false }) {
     const [down, setDown] = useState(false);
-    const size = compact ? 'w-[68px] h-[68px]' : 'w-[104px] h-[104px]';
-    const cap = compact ? 'inset-[15px]' : 'inset-[24px]';
+    const size = compact ? 'w-[58px] h-[58px]' : 'w-[104px] h-[104px]';
+    const cap = compact ? 'inset-[13px]' : 'inset-[24px]';
 
     return (
         <div className="flex flex-col items-center gap-2">
@@ -117,10 +117,10 @@ function ShutterButton({ powerOn, onShutter, onPower, compact = false }) {
                     <span className="absolute inset-[4px] rounded-full mat-spun" />
                     {/* lever tab */}
                     <span
-                        className={`absolute left-1/2 -translate-x-1/2 ${compact ? '-top-[7px] w-4 h-3' : '-top-[10px] w-6 h-4'} rounded-t-[5px] rounded-b-[2px] mat-silver ring-1 ring-black/40 shadow-[0_2px_3px_rgba(0,0,0,0.5)]`}
+                        className={`absolute left-1/2 -translate-x-1/2 ${compact ? '-top-[6px] w-4 h-3' : '-top-[10px] w-6 h-4'} rounded-t-[5px] rounded-b-[2px] mat-silver ring-1 ring-black/40 shadow-[0_2px_3px_rgba(0,0,0,0.5)]`}
                     />
                     {/* power index dot on the collar */}
-                    <span className={`absolute left-1/2 -translate-x-1/2 ${compact ? 'top-[5px]' : 'top-[7px]'} w-[5px] h-[5px] rounded-full ${powerOn ? 'bg-rec' : 'bg-zinc-600'}`} />
+                    <span className={`absolute left-1/2 -translate-x-1/2 ${compact ? 'top-[4px]' : 'top-[7px]'} w-[5px] h-[5px] rounded-full ${powerOn ? 'bg-rec' : 'bg-zinc-600'}`} />
                 </button>
 
                 {/* release button */}
@@ -253,23 +253,23 @@ export default function GripControls({
             </div>
 
             {/* ---------------- REAR / LEATHER ---------------- */}
-            <div className="relative flex-1 mat-leather flex flex-row md:flex-col items-center justify-between md:justify-start gap-3 md:gap-9 [@media(min-width:768px)_and_(max-height:800px)]:gap-5 px-4 py-4 md:px-8 md:pt-10 [@media(min-width:768px)_and_(max-height:800px)]:pt-6 md:pb-6 border-t border-black md:border-t-0 md:border-l md:border-l-black/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:shadow-[inset_12px_0_18px_-10px_rgba(0,0,0,0.9)] pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="relative flex-1 mat-leather flex flex-row md:flex-col items-center justify-between md:justify-start gap-4 md:gap-9 [@media(min-width:768px)_and_(max-height:800px)]:gap-5 px-5 pt-3 md:px-8 md:pt-10 [@media(min-width:768px)_and_(max-height:800px)]:pt-6 md:pb-6 border-t border-black md:border-t-0 md:border-l md:border-l-black/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:shadow-[inset_12px_0_18px_-10px_rgba(0,0,0,0.9)] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                 {/* Selector (desktop only; touch uses taps and swipes on the screen) */}
                 <div className="hidden md:block">
                     <SelectorPad onDirection={direction} onOk={ok} activeButton={activeButton} />
                 </div>
 
                 {/* Buttons */}
-                <div className="grid grid-cols-4 md:grid-cols-2 gap-x-4 gap-y-2 md:gap-x-10 md:gap-y-5 [@media(min-width:768px)_and_(max-height:800px)]:gap-y-3">
+                <div className="flex-1 md:flex-none grid grid-cols-4 md:grid-cols-2 justify-items-center gap-x-2 gap-y-2 md:gap-x-10 md:gap-y-5 [@media(min-width:768px)_and_(max-height:800px)]:gap-y-3">
                     {buttons.map((b) => (
                         <RoundButton key={b.name} {...b} activeButton={activeButton} />
                     ))}
                 </div>
 
                 {/* Shutter on touch layouts */}
-                <div className="md:hidden flex flex-col items-center gap-3 pt-2">
+                <div className="md:hidden flex items-center gap-4 pt-1.5">
+                    <span className="w-px h-10 bg-white/[0.07] shadow-[1px_0_0_rgba(0,0,0,0.6)]" />
                     <ShutterButton compact powerOn={powerOn} onShutter={handleShutter} onPower={togglePower} />
-                    <span className="text-[8px] font-bold tracking-[0.25em] engrave-dark">{powerOn ? 'ON' : 'OFF'}</span>
                 </div>
 
                 {/* Badge */}
