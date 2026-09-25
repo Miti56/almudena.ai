@@ -1,125 +1,105 @@
-import React, { useRef } from 'react';
-import { Play, X, Clapperboard, CornerUpLeft } from 'lucide-react';
+import React, { useState } from 'react';
+import { Play, X } from 'lucide-react';
+import { simFor, fileNo } from '../../lib/camera';
+
+function Spec({ label, children, wide }) {
+    return (
+        <div className={`py-2.5 border-b border-white/10 ${wide ? 'col-span-2' : ''}`}>
+            <div className="font-mono text-[9px] tracking-[0.2em] text-white/40 uppercase mb-1">{label}</div>
+            <div className="text-[13px] text-white/90">{children}</div>
+        </div>
+    );
+}
 
 export default function FilmDetail({ selectedFilm, handleBack }) {
-    const videoRef = useRef(null);
+    const [isPlaying, setIsPlaying] = useState(false);
     if (!selectedFilm) return null;
-    const [isPlaying, setIsPlaying] = React.useState(false);
-    const canPlay = selectedFilm?.url && selectedFilm.url !== 'n/a';
 
+    const film = selectedFilm;
+    const canPlay = film.url && film.url !== 'n/a';
+    const sim = simFor(film);
 
     return (
-        // Added overflow-y-auto for mobile scrolling, lg:overflow-hidden to lock it on desktop
-        <div className="absolute inset-0 bg-zinc-950/95 backdrop-blur-md transition-all duration-300 opacity-100 z-50 overflow-y-auto lg:overflow-hidden">
-
-            {/* Added min-h-full to ensure it fills screen, but p-4 allows scrolling content */}
-            <div className="min-h-full lg:h-full flex flex-col lg:flex-row gap-6 p-4 md:p-8">
-
-                // LEFT: Video Player
-                <div className="w-full lg:flex-1 flex flex-col justify-center shrink-0 min-h-[250px] lg:min-h-0">
-                    <div
-                        className={`relative w-full aspect-video bg-black rounded-lg border border-white/10 shadow-2xl overflow-hidden group ${
-                            !canPlay ? 'cursor-not-allowed' : ''
-                        }`}
-                        // Removed the conflicting onClick handler here
-                    >
-                        {/* Video Element */}
+        <div className="absolute inset-0 z-50 bg-[#0a0a0a]/95 backdrop-blur-xl overflow-y-auto lg:overflow-hidden animate-[fade_0.3s_ease-out_both]">
+            <div className="min-h-full lg:h-full flex flex-col lg:flex-row gap-5 lg:gap-8 p-3 md:p-6 lg:p-8">
+                {/* Player */}
+                <div className="w-full lg:flex-1 flex flex-col justify-center shrink-0 min-h-0 animate-[pop_0.6s_cubic-bezier(0.16,1,0.3,1)_0.05s_both]">
+                    <div className="relative w-full aspect-video bg-black rounded-[3px] overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.6)] ring-1 ring-white/10">
                         <video
-                            ref={videoRef}
-                            src={canPlay ? selectedFilm.url : undefined}
-                            poster={selectedFilm.src}
+                            key={film.id}
+                            src={canPlay ? film.url : undefined}
+                            poster={film.src}
                             className="w-full h-full object-cover"
                             preload="metadata"
-                            controls={true}
-                            playsInline // CRITICAL: Forces Safari to allow inline playback
+                            controls={canPlay}
+                            playsInline // required for inline playback on iOS Safari
                             onPlay={() => setIsPlaying(true)}
                             onPause={() => setIsPlaying(false)}
                         />
 
-                        {/* Dark overlay */}
-                        {/* pointer-events-none ensures this doesn't block clicks to the native controls */}
-                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors pointer-events-none" />
+                        {/* Playback OSD; fades away while the film plays. Never captures clicks. */}
+                        <div className={`absolute inset-0 pointer-events-none osd transition-opacity duration-500 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}>
+                            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent" />
+                            <div className="absolute top-3 inset-x-3 flex justify-between font-mono text-[10px] font-bold">
+                                <span className="flex items-center gap-2">
+                                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-[3px] bg-osd text-black">
+                                        <Play size={9} fill="currentColor" />
+                                    </span>
+                                    {fileNo(film)}
+                                </span>
+                                <span className="flex items-center gap-2">
+                                    <span className="px-1 border border-osd/70 rounded-[2px]">{sim.code}</span>
+                                    <span>{film.res}</span>
+                                </span>
+                            </div>
+                        </div>
 
-                        {/* Disabled state */}
                         {!canPlay && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10">
-                <span className="text-white/40 text-xs uppercase tracking-widest font-mono">
-                    No video available
-                </span>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/65">
+                                <span className="font-mono text-[10px] tracking-[0.3em] text-amber">NO DATA</span>
+                                <span className="text-white/50 text-xs">Vídeo no disponible</span>
                             </div>
                         )}
-
-                        {/* Label */}
-                        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] text-white font-mono border border-white/10 pointer-events-none">
-                            RAW PREVIEW
-                        </div>
                     </div>
                 </div>
 
-                {/* RIGHT: Info Panel */}
-                {/* On mobile: standard div. On Desktop: fixed width with internal scroll */}
-                <div className="w-full lg:w-[400px] flex flex-col lg:h-full lg:overflow-hidden pb-10 lg:pb-0">
-                    <div className="flex justify-between items-start mb-6 shrink-0">
-                        <div className="border-l-4 border-green-500 pl-4">
-                            <h1 className="text-3xl md:text-4xl text-white font-camera uppercase leading-none mb-2 tracking-wide">{selectedFilm.title}</h1>
-                            <div className="flex items-center gap-2 text-green-500 font-mono text-xs">
-                                <span>{selectedFilm.year}</span>
-                                <span>//</span>
-                                <span className="uppercase">{selectedFilm.director}</span>
+                {/* Info panel */}
+                <div className="w-full lg:w-[380px] flex flex-col lg:h-full lg:overflow-hidden pb-8 lg:pb-0">
+                    <div className="flex justify-between items-start gap-4 mb-5 shrink-0 animate-[rise_0.7s_cubic-bezier(0.16,1,0.3,1)_0.1s_both]">
+                        <div>
+                            <div className="font-mono text-[10px] tracking-[0.25em] text-fuji mb-2">
+                                {film.year} · {film.runtime.toUpperCase()}
                             </div>
+                            <h1 className="text-3xl md:text-4xl font-[800] uppercase leading-[0.95] text-white" style={{ fontStretch: '112%' }}>
+                                {film.title}
+                            </h1>
+                            <p className="mt-2 font-serif italic text-lg text-white/70">{film.project}</p>
                         </div>
-                        <button onClick={handleBack} className="p-2 hover:bg-white/10 rounded-full transition-colors group">
-                            <X className="text-white/50 group-hover:text-white transition-colors" size={24} />
+                        <button onClick={handleBack} aria-label="Cerrar" className="shrink-0 w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-colors">
+                            <X size={18} />
                         </button>
                     </div>
 
-                    {/* On Desktop: overflow-y-auto. On Mobile: visible (main container scrolls) */}
-                    <div className="flex-1 lg:overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent space-y-6 font-camera">
+                    <div className="flex-1 lg:overflow-y-auto pr-1 scrollbar-thin space-y-6">
+                        <section className="animate-[rise_0.7s_cubic-bezier(0.16,1,0.3,1)_0.18s_both]">
+                            <h4 className="font-mono text-[9px] tracking-[0.25em] text-white/40 uppercase mb-2">Sinopsis</h4>
+                            <p className="text-white/90 text-[15px] leading-relaxed">{film.description}</p>
+                        </section>
 
-                        {/* Synopsis */}
-                        <div className="bg-white/5 p-4 rounded-lg border border-white/5">
-                            <h4 className="text-white/40 text-[10px] uppercase tracking-widest mb-2 flex items-center gap-2">
-                                <Clapperboard size={12} /> Synopsis
-                            </h4>
-                            <p className="text-white/90 text-sm md:text-base leading-relaxed font-sans">{selectedFilm.description}</p>
-                        </div>
-
-                        {/* Director's Note */}
-                        {selectedFilm.description2 && (
-                            <div className="bg-white/5 p-4 rounded-lg border border-white/5">
-                                <h4 className="text-white/40 text-[10px] uppercase tracking-widest mb-2 flex items-center gap-2">
-                                    <CornerUpLeft size={12} /> Director's Note
-                                </h4>
-                                <p className="text-white/70 text-sm italic leading-relaxed font-serif">{selectedFilm.description2}</p>
-                            </div>
+                        {film.description2 && (
+                            <section className="animate-[rise_0.7s_cubic-bezier(0.16,1,0.3,1)_0.24s_both]">
+                                <h4 className="font-mono text-[9px] tracking-[0.25em] text-white/40 uppercase mb-2">Nota de dirección</h4>
+                                <p className="font-serif italic text-white/75 text-lg leading-snug border-l border-fuji/60 pl-4">{film.description2}</p>
+                            </section>
                         )}
 
-                        {/* Tech Specs Grid */}
-                        <div>
-                            <h4 className="text-white/40 text-[10px] uppercase tracking-widest mb-3 border-b border-white/10 pb-1">Production Specs</h4>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="bg-black/40 p-2 rounded border border-white/10">
-                                    <span className="text-white/30 text-[9px] uppercase block mb-1">Cast</span>
-                                    <span className="text-white/90 text-xs font-medium">{selectedFilm.actor}</span>
-                                </div>
-                                <div className="bg-black/40 p-2 rounded border border-white/10">
-                                    <span className="text-white/30 text-[9px] uppercase block mb-1">Runtime</span>
-                                    <span className="text-white/90 text-xs font-mono">{selectedFilm.runtime}</span>
-                                </div>
-                                <div className="bg-black/40 p-2 rounded border border-white/10">
-                                    <span className="text-white/30 text-[9px] uppercase block mb-1">Format</span>
-                                    <span className="text-white/90 text-xs font-mono">{selectedFilm.res}</span>
-                                </div>
-                                <div className="bg-black/40 p-2 rounded border border-white/10">
-                                    <span className="text-white/30 text-[9px] uppercase block mb-1">Size</span>
-                                    <span className="text-white/90 text-xs font-mono">{selectedFilm.size}</span>
-                                </div>
-                                <div className="bg-black/40 p-2 rounded border border-white/10 col-span-2">
-                                    <span className="text-white/30 text-[9px] uppercase block mb-1">Role</span>
-                                    <span className="text-green-400 text-xs font-mono uppercase">{selectedFilm.role}</span>
-                                </div>
-                            </div>
-                        </div>
+                        <section className="grid grid-cols-2 gap-x-5 animate-[rise_0.7s_cubic-bezier(0.16,1,0.3,1)_0.3s_both]">
+                            <Spec label="Dirección" wide>{film.director}</Spec>
+                            <Spec label="Rol">{film.role}</Spec>
+                            <Spec label="Duración"><span className="font-mono">{film.runtime}</span></Spec>
+                            <Spec label="Formato"><span className="font-mono">{film.res}</span></Spec>
+                            <Spec label="Simulación"><span className="font-mono">{sim.name}</span></Spec>
+                        </section>
                     </div>
                 </div>
             </div>

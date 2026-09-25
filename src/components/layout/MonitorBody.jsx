@@ -1,271 +1,243 @@
-import React, { useRef, useEffect, useState } from 'react';
-import Screw from '../ui/Screw';
+import React, { useEffect, useRef, useState } from 'react';
+import { Download } from 'lucide-react';
 import Viewfinder from '../screen/Viewfinder';
 import Gallery from '../screen/Gallery';
 import FilmDetail from '../screen/FilmDetail';
 import SystemInfo from '../screen/SystemInfo';
-import StandbyScreensaver from '../screen/StandbyScreensaver';
+import LiveView from '../screen/LiveView';
+import BootScreen from '../screen/BootScreen';
+import Iris from '../ui/Iris';
+import { FILMS } from '../../data/cameraData';
 import dirtImg from '../../assets/textures/001.webp';
-import { Play, Settings, Camera, AlertCircle } from 'lucide-react';
+
+const HELP = [
+    ['◀ ▶', 'Cambiar película'],
+    ['OK', 'Ver película'],
+    ['PLAY', 'Galería'],
+    ['INFO', 'Sobre mí'],
+    ['SELFIE', 'Cámara frontal'],
+    ['●', 'Disparador · volver'],
+];
+
+function HelpCard() {
+    return (
+        <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none bg-black/45 animate-[fade_0.25s_ease-out_both]">
+            <div className="w-full max-w-[300px] bg-black/80 backdrop-blur-xl border border-white/15 rounded-[6px] shadow-2xl overflow-hidden animate-[pop_0.3s_cubic-bezier(0.16,1,0.3,1)_both]">
+                <div className="flex items-center justify-between px-4 h-9 bg-osd text-black">
+                    <span className="text-[10px] font-[800] tracking-[0.25em]">GUÍA RÁPIDA</span>
+                    <span className="font-mono text-[10px]">?</span>
+                </div>
+                <div className="py-1">
+                    {HELP.map(([key, label], i) => (
+                        <div
+                            key={key}
+                            className="flex items-center gap-3 px-4 py-2 border-b border-white/[0.06] last:border-0 animate-[rise_0.4s_cubic-bezier(0.16,1,0.3,1)_both]"
+                            style={{ animationDelay: `${60 + i * 35}ms` }}
+                        >
+                            <span className="min-w-12 text-center font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-[3px] border border-white/25 text-osd">{key}</span>
+                            <span className="text-sm text-white/85">{label}</span>
+                        </div>
+                    ))}
+                </div>
+                <div className="hidden md:block px-4 py-2 bg-white/5 font-mono text-[9px] tracking-[0.15em] text-white/45">
+                    TECLADO: ← → ↑ ↓ · ENTER · ESC · P · I
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function MonitorBody({
-                                        powerOn,
-                                        bootSequence,
-                                        view,
-                                        time,
-                                        isRecording,
-                                        formatTime,
-                                        galleryFocusIndex,
-                                        gridMode,
-                                        toggleGridMode,
-                                        selectFilm,
-                                        selectedFilm,
-                                        handleBack,
-                                        webcamStream,
-                                        navHint
-                                    }) {
-
+    powerOn,
+    bootSequence,
+    view,
+    liveIndex,
+    onLiveNext,
+    onLivePrev,
+    openLive,
+    isSelfieMode,
+    webcamStream,
+    navHint,
+    shutterTick,
+    frames,
+    galleryFocusIndex,
+    setGalleryFocusIndex,
+    gridMode,
+    toggleGridMode,
+    selectFilm,
+    selectedFilm,
+    handleBack,
+    infoTab,
+    setInfoTab,
+}) {
     const videoRef = useRef(null);
-    const [previewAdvance, setPreviewAdvance] = useState(0);
+    const [capture, setCapture] = useState(null);
+    const lastTick = useRef(shutterTick);
 
-    // Handle Webcam Stream Lifecycle
+    // Attach the webcam stream
     useEffect(() => {
         if (videoRef.current && webcamStream) {
             videoRef.current.srcObject = webcamStream;
-            videoRef.current.play().catch(e => console.log("Stream play error", e));
+            videoRef.current.play().catch(() => {});
         }
     }, [webcamStream]);
 
-    // Reusable Boot Log Line Component
-    const BootLine = ({ text, delay }) => (
-        <div
-            className="flex items-center gap-2 text-green-500/90 font-mono text-xs md:text-sm font-bold tracking-wide opacity-0 animate-[slideIn_0.3s_ease-out_forwards]"
-            style={{ animationDelay: delay }}
-        >
-            <span className="text-green-500">{'>'}</span>
-            {text}
-        </div>
-    );
+    // Selfie capture: grab the frame while the iris is shut, like a real exposure
+    useEffect(() => {
+        if (shutterTick === lastTick.current) return;
+        lastTick.current = shutterTick;
+        if (!isSelfieMode) return;
+        const t = setTimeout(() => {
+            const video = videoRef.current;
+            if (!video || video.readyState < 2) return;
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const c2d = canvas.getContext('2d');
+            c2d.translate(canvas.width, 0);
+            c2d.scale(-1, 1);
+            c2d.drawImage(video, 0, 0);
+            setCapture({ url: canvas.toDataURL('image/jpeg', 0.92), key: shutterTick });
+        }, 110);
+        return () => clearTimeout(t);
+    }, [shutterTick, isSelfieMode]);
+
+    // Hide the capture thumbnail after a while
+    useEffect(() => {
+        if (!capture) return;
+        const t = setTimeout(() => setCapture(null), 6000);
+        return () => clearTimeout(t);
+    }, [capture]);
+
+    const live = powerOn && !bootSequence;
+    const film = FILMS[liveIndex];
 
     return (
-        <div className="flex-1 relative p-0 md:p-8 flex flex-col items-center justify-center z-10 w-full overflow-hidden">
-
-            {/* --- CSS ANIMATION DEFINITIONS --- */}
-            <style>{`
-                @keyframes slideIn {
-                    from { opacity: 0; transform: translateY(5px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-                @keyframes expandWidth {
-                    from { width: 0%; }
-                    to { width: 100%; }
-                }
-            `}</style>
-
-            {/* --- BEZEL CONTAINER --- */}
-            <div className="relative w-full h-full bg-[#0a0a0a] md:rounded-lg md:shadow-[inset_0_0_20px_rgba(0,0,0,1),0_1px_0_rgba(255,255,255,0.1)] p-0 md:p-2 md:border-t md:border-white/5 md:border-b md:border-black flex flex-col overflow-hidden">
-
-                {/* Top Bezel (Desktop Only) */}
-                <div className="hidden md:block h-2 w-full bg-black mb-1 rounded-t-sm"></div>
-
-                {/* --- LCD SCREEN --- */}
-                <div className={`relative flex-1 w-full bg-black overflow-hidden shadow-none md:shadow-[inset_0_0_10px_rgba(0,0,0,1)] transition-opacity duration-500 ${!powerOn ? 'opacity-10' : 'opacity-100'} md:rounded-sm border-b border-white/20 md:border-0`}>
-
-                    {/* ========================================= */}
-                    {/* 1. BOOT SEQUENCE LAYER (Top Priority)     */}
-                    {/* ========================================= */}
-                    {powerOn && bootSequence && (
-                        <div className="absolute inset-0 z-50 bg-black flex flex-col p-6 md:p-12 font-mono select-none overflow-hidden">
-
-                            {/* Header Info */}
-                            <div className="flex justify-between items-start border-b border-zinc-800 pb-2 mb-8 animate-[fadeIn_0.5s_ease-out]">
-                                <div className="text-xs text-zinc-500">
-                                    <div>SYS.BOOT_SEQ // v2.4.0</div>
-                                    <div>MEM_CHECK: 64GB OK</div>
-                                </div>
-                                <div className="text-xs text-zinc-600 text-right">
-                                    PORTFOLIO_OS
-                                </div>
-                            </div>
-
-                            {/* Main Identity (Center) */}
-                            <div className="flex-1 flex flex-col justify-center items-center gap-6">
-                                <div className="text-center space-y-2 animate-[slideIn_0.8s_ease-out_0.2s_both]">
-                                    <h1 className="text-2xl md:text-5xl text-white font-black tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-                                        ALMUDENA
-                                    </h1>
-                                    <h2 className="text-lg md:text-2xl text-zinc-400 font-bold tracking-[0.4em] uppercase">
-                                        Mirones Riotte
-                                    </h2>
-                                </div>
-
-                                {/* Progress Bar */}
-                                <div className="w-full max-w-xs md:max-w-md mt-4">
-                                    <div className="h-2 w-full bg-zinc-900 border border-zinc-700 p-[1px]">
-                                        <div
-                                            className="h-full bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-[expandWidth_2.5s_cubic-bezier(0.22,1,0.36,1)_forwards]"
-                                        ></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Rolling Technical Log (Bottom) */}
-                            <div className="mt-auto border-t border-zinc-800 pt-4 flex flex-col md:flex-row justify-between items-end gap-4">
-                                <div className="flex flex-col gap-1 w-full">
-                                    <BootLine text="MOUNTING VIRTUAL LENS..." delay="200ms" />
-                                    <BootLine text="CALIBRATING SENSOR [35MM]..." delay="600ms" />
-                                    <BootLine text="LOADING COLOR PROFILES (REC.709)..." delay="1000ms" />
-                                    <BootLine text="INITIALIZING UI..." delay="1400ms" />
-                                    <div className="flex items-center gap-2 text-white font-bold text-xs md:text-sm animate-pulse mt-1" style={{ animationDelay: '1800ms' }}>
-                                        <span className="text-green-500">{'>'}</span> SYSTEM READY_
-                                    </div>
-                                </div>
-
-                                <div className="min-w-max text-right animate-[fadeIn_0.5s_ease-out_1s_both]">
-                                    <div className="text-[10px] md:text-xs text-zinc-600 uppercase tracking-widest mb-1">Architecture</div>
-                                    <div className="text-xs md:text-sm text-zinc-400 font-bold">
-                                        designed with <span className="text-red-900">♥</span> by miti
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-50 bg-[length:100%_2px,3px_100%] pointer-events-none opacity-20"></div>
-                        </div>
-                    )}
-
-
-                    {/* ========================================= */}
-                    {/* 2. BACKGROUND LAYER (Screensaver/Webcam)  */}
-                    {/* ========================================= */}
-
+        <div className="relative flex-1 min-h-0 w-full flex flex-col md:p-6 lg:p-8 z-10">
+            {/* Monitor surround (desktop) */}
+            <div className="relative flex-1 min-h-0 flex flex-col md:mat-paint md:rounded-[18px] md:p-3 md:shadow-[0_1px_0_rgba(255,255,255,0.08)_inset,0_-1px_0_rgba(0,0,0,0.8)_inset,0_20px_40px_rgba(0,0,0,0.45)]">
+                {/* ---------------- LCD ---------------- */}
+                <div className="relative flex-1 min-h-0 bg-black overflow-hidden lcd-glass md:rounded-[8px] md:ring-1 md:ring-black md:shadow-[0_0_0_3px_#0b0b0b,0_0_0_4px_rgba(255,255,255,0.06),inset_0_0_18px_rgba(0,0,0,0.9)]">
+                    {/* 1. Sensor feed */}
                     {webcamStream ? (
                         <video
                             ref={videoRef}
-                            className={`absolute transition-all duration-700 ease-in-out object-cover border-zinc-800
-                            ${view !== 'viewfinder'
-                                ? 'scale-110 inset-0 w-full h-full blur-md brightness-50'
-                                : 'inset-0 scale-100 border-0 w-full h-full'
-                            }`}
+                            className={`absolute inset-0 w-full h-full object-cover transition-[filter,transform] duration-700 ${view !== 'viewfinder' ? 'blur-md brightness-[0.35]' : ''}`}
+                            style={{ transform: 'scaleX(-1)' }}
                             autoPlay
-                            loop
                             muted
                             playsInline
-                            style={{ transform: 'scaleX(-1)' }}
                         />
-                    ) : powerOn ? (
-                        <div className={`absolute inset-0 w-full h-full transition-all duration-700 ${view !== 'viewfinder' ? 'blur-sm brightness-50' : ''}`}>
-                            <StandbyScreensaver active={!bootSequence} advanceTrigger={previewAdvance} />
+                    ) : (
+                        <LiveView index={liveIndex} active={live && view === 'viewfinder'} onNext={onLiveNext} dimmed={view !== 'viewfinder'} />
+                    )}
+
+                    {/* 2. OSD & menus */}
+                    {live && (
+                        <div className="absolute inset-0 z-10">
+                            {view === 'viewfinder' && (
+                                <Viewfinder
+                                    film={film}
+                                    index={liveIndex}
+                                    total={FILMS.length}
+                                    isSelfie={isSelfieMode}
+                                    videoRef={videoRef}
+                                    frames={frames}
+                                    autoplay={!isSelfieMode}
+                                    onOpen={openLive}
+                                    onPrev={onLivePrev}
+                                    onNext={onLiveNext}
+                                />
+                            )}
+                            {view === 'gallery' && (
+                                <Gallery
+                                    galleryFocusIndex={galleryFocusIndex}
+                                    onFocusIndex={setGalleryFocusIndex}
+                                    gridMode={gridMode}
+                                    toggleGridMode={toggleGridMode}
+                                    selectFilm={selectFilm}
+                                    handleBack={handleBack}
+                                />
+                            )}
+                            {view === 'detail' && <FilmDetail selectedFilm={selectedFilm} handleBack={handleBack} />}
+                            {view === 'info' && <SystemInfo handleBack={handleBack} tabIndex={infoTab} onTab={setInfoTab} />}
                         </div>
-                    ) : null}
+                    )}
 
-
-                    {/* ========================================= */}
-                    {/* 3. UI LAYER (Menus & OSD)                 */}
-                    {/* ========================================= */}
-                    <div className="relative z-10 h-full">
-                        {powerOn && !bootSequence && (
-                            <>
-                                {/* Navigation Toast / Help Overlay */}
-                                {navHint && (
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none">
-                                        {navHint === 'HELP_MENU' ? (
-                                            // --- DETAILED HELP MENU ---
-                                            <div className="bg-black/80 border border-white/20 px-6 py-4 rounded shadow-2xl backdrop-blur-md animate-in fade-in zoom-in duration-200 flex flex-col gap-3 min-w-[240px]">
-                                                <div className="text-[10px] text-zinc-500 font-bold tracking-widest border-b border-white/10 pb-2 mb-1">
-                                                    COMMAND LIST
-                                                </div>
-
-                                                <div className="flex items-center gap-3 text-white/80">
-                                                    <Play size={16} />
-                                                    <span className="font-camera tracking-widest text-sm"> PRESS FOR GALLERY VIEW</span>
-                                                </div>
-
-                                                <div className="flex items-center gap-3 text-white/80">
-                                                    <Settings size={16} />
-                                                    <span className="font-camera tracking-widest text-sm">PRESS FOR ARTIST INFO</span>
-                                                </div>
-
-                                                <div className="flex items-center gap-3 text-white/80">
-                                                    <Camera size={16} />
-                                                    <span className="font-camera tracking-widest text-sm">PRESS FOR SELFIE MODE</span>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            // --- STANDARD TOAST MESSAGE ---
-                                            <div className="bg-black/80 border border-green-500/50 text-green-500 px-4 py-2 rounded shadow-2xl backdrop-blur-md animate-in fade-in zoom-in duration-200">
-                                                <span className="font-camera text-sm md:text-lg tracking-widest">{navHint}</span>
-                                            </div>
-                                        )}
+                    {/* 3. Hints */}
+                    {live && navHint && (
+                        <div className="absolute inset-0 z-30 pointer-events-none">
+                            {navHint === 'HELP_MENU' ? (
+                                <HelpCard />
+                            ) : (
+                                <div className="absolute top-14 md:top-16 left-1/2 -translate-x-1/2 animate-[pop_0.3s_cubic-bezier(0.16,1,0.3,1)_both]">
+                                    <div className="flex items-center gap-2 h-8 px-4 rounded-full bg-black/75 backdrop-blur-md border border-white/15 osd">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-fuji" />
+                                        <span className="font-mono text-[11px] tracking-[0.2em] whitespace-nowrap">{navHint}</span>
                                     </div>
-                                )}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
-                                {view === 'viewfinder' && (
-                                    <div
-                                        className="absolute inset-0 p-2 md:p-6 flex flex-col justify-between cursor-pointer"
-                                        onClick={() => setPreviewAdvance(p => p + 1)}
-                                    >
-                                        <Viewfinder osdMode={2} time={time} formatTime={formatTime} />
-                                    </div>
-                                )}
-                                {view === 'gallery' && (
-                                    <Gallery
-                                        galleryFocusIndex={galleryFocusIndex}
-                                        gridMode={gridMode}
-                                        toggleGridMode={toggleGridMode}
-                                        selectFilm={selectFilm}
-                                        handleBack={handleBack}
-                                    />
-                                )}
-                                {view === 'detail' && (
-                                    <FilmDetail selectedFilm={selectedFilm} handleBack={handleBack} />
-                                )}
+                    {/* 4. Selfie capture thumbnail */}
+                    {capture && view === 'viewfinder' && (
+                        <a
+                            key={capture.key}
+                            href={capture.url}
+                            download={`ALMUDENA_${String(capture.key).padStart(4, '0')}.jpg`}
+                            className="absolute z-30 right-3 bottom-14 md:right-5 md:bottom-20 w-24 md:w-36 aspect-[4/3] rounded-[3px] overflow-hidden ring-2 ring-osd shadow-2xl group animate-[pop_0.5s_cubic-bezier(0.34,1.56,0.64,1)_0.2s_both]"
+                        >
+                            <img src={capture.url} alt="Captura" className="w-full h-full object-cover" />
+                            <span className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity text-osd">
+                                <Download size={18} />
+                            </span>
+                        </a>
+                    )}
 
-                                {/* UPDATED: Pass isVisible={true} so it shows up immediately */}
-                                {view === 'info' && (
-                                    <SystemInfo isVisible={true} handleBack={handleBack} />
-                                )}
-                            </>
-                        )}
-                    </div>
+                    {/* 5. Shutter flash + iris */}
+                    {shutterTick > 0 && (
+                        <div key={shutterTick} className="absolute inset-0 z-[35] bg-white pointer-events-none" style={{ animation: 'flash 0.45s ease-out 0.12s both' }} />
+                    )}
+                    <Iris open={live} snapKey={shutterTick} className="z-[36]" />
 
-                    {/* ========================================= */}
-                    {/* 4. PHYSICAL OVERLAYS (Dirt, Scanlines)    */}
-                    {/* ========================================= */}
+                    {/* 6. Boot */}
+                    {powerOn && bootSequence && <BootScreen />}
 
-                    {/* UPDATED: Removed the {osdMode !== 3} check. Scanlines are always on now. */}
-                    <div className="absolute inset-0 z-20 pointer-events-none">
-                        <div className="absolute inset-0 scanline opacity-10"></div>
-                        <div className="absolute inset-0 screen-pixel opacity-10"></div>
-                        <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_50%,rgba(0,0,0,0.4)_100%)]"></div>
-                    </div>
+                    {/* 7. Panel off */}
+                    <div className={`absolute inset-0 z-[45] bg-[#050505] pointer-events-none transition-opacity duration-700 ${powerOn ? 'opacity-0' : 'opacity-100 delay-300'}`} />
 
-                    <div className="absolute inset-0 pointer-events-none z-40" style={{ backgroundImage: `url(${dirtImg})`, backgroundSize: 'cover', backgroundPosition: 'center', mixBlendMode: 'screen', opacity: 0.3 }}></div>
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none rounded-sm z-50"></div>
+                    {/* 8. Physical panel: sub-pixels, grain, dust */}
+                    <div className="absolute inset-0 z-50 pointer-events-none lcd-pixels opacity-40" />
+                    <div className="absolute -inset-[20%] z-50 pointer-events-none film-grain opacity-[0.045] mix-blend-overlay" />
+                    <div
+                        className="absolute inset-0 z-50 pointer-events-none opacity-[0.08] mix-blend-screen"
+                        style={{ backgroundImage: `url(${dirtImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                    />
                 </div>
 
-                {/* --- BOTTOM CHIN (Desktop Only) --- */}
-                <div className="hidden md:flex h-8 w-full bg-[#0a0a0a] items-center justify-center rounded-b-sm border-t border-white/5 z-20">
-                    <span className="text-[10px] font-bold tracking-[0.3em] text-white/40 drop-shadow-[0_1px_0_rgba(0,0,0,1)]">CINEMA MONITOR // 8K</span>
+                {/* ---------------- CHIN (desktop) ---------------- */}
+                <div className="hidden md:flex items-center justify-between h-7 mt-2 px-2">
+                    <span className="text-[9px] font-bold tracking-[0.35em] engrave-dark" style={{ fontStretch: '120%' }}>
+                        TILT LCD 3.0
+                    </span>
+                    {/* speaker grille */}
+                    <span className="flex gap-[5px]">
+                        {Array.from({ length: 7 }, (_, i) => (
+                            <span key={i} className="w-[3px] h-[3px] rounded-full bg-black shadow-[0_1px_0_rgba(255,255,255,0.08)]" />
+                        ))}
+                    </span>
+                    {/* card-access lamp */}
+                    <span className="flex items-center gap-2">
+                        <span
+                            key={shutterTick}
+                            className={`w-[6px] h-[6px] rounded-full ${powerOn ? 'bg-fuji' : 'bg-[#1d2a22]'}`}
+                            style={powerOn ? { animation: 'blink 0.18s steps(1) 4', boxShadow: '0 0 6px rgba(47,211,122,0.7)' } : undefined}
+                        />
+                        <span className="text-[9px] font-bold tracking-[0.3em] engrave-dark">ACCESS</span>
+                    </span>
                 </div>
-
             </div>
-
-            {/* Decorative Screws (Desktop Only) */}
-            <Screw className="hidden md:block absolute top-3 left-3 z-30" />
-            <Screw className="hidden md:block absolute top-3 right-3 z-30" />
-            <Screw className="hidden md:block absolute bottom-3 left-3 z-30" />
-            <Screw className="hidden md:block absolute bottom-3 right-3 z-30" />
-
-            {/* REC LIGHT */}
-            {powerOn && (
-                <div className={`absolute top-4 right-4 md:top-6 md:right-6 z-30 hidden md:flex items-center gap-2 transition-opacity duration-300 ${isRecording ? 'opacity-100' : 'opacity-20'}`}>
-                    <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,1)] animate-pulse border border-black/50"></div>
-                </div>
-            )}
         </div>
     );
 }

@@ -1,191 +1,349 @@
-import React, { useState, useRef } from 'react';
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Play, Info, Settings, Power, CornerUpLeft, Camera } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Play, Info, CornerUpLeft, Camera, User } from 'lucide-react';
 import RoundButton from '../ui/RoundButton';
+import { tick } from '../../lib/sfx';
 
-function VirtualJoystick({ onDirection, onOk }) {
-    const [knobPos, setKnobPos] = useState({ x: 0, y: 0 });
-    const startPos = useRef(null);
-    const maxRadius = 26;
-    const threshold = 12;
+// ---------------------------------------------------------------------------
+// Mode dial: a knurled dial that physically rotates to the active mode
+// ---------------------------------------------------------------------------
 
-    const handleTouchStart = (e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        startPos.current = { x: touch.clientX, y: touch.clientY };
-    };
+const MODES = [
+    { id: 'live', label: 'LV' },
+    { id: 'play', label: '▶' },
+    { id: 'info', label: 'INFO' },
+    { id: 'selfie', label: 'SELF' },
+];
+const DETENT = 60;
 
-    const handleTouchMove = (e) => {
-        e.preventDefault();
-        if (!startPos.current) return;
-        const touch = e.touches[0];
-        const dx = touch.clientX - startPos.current.x;
-        const dy = touch.clientY - startPos.current.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > maxRadius) {
-            const scale = maxRadius / dist;
-            setKnobPos({ x: dx * scale, y: dy * scale });
-        } else {
-            setKnobPos({ x: dx, y: dy });
-        }
-    };
+function ModeDial({ mode, onMode, disabled }) {
+    const idx = MODES.findIndex((m) => m.id === mode);
+    const [dial, setDial] = useState({ mode, angle: -idx * DETENT });
 
-    const handleTouchEnd = (e) => {
-        e.preventDefault();
-        const { x, y } = knobPos;
-        if (Math.abs(x) < threshold && Math.abs(y) < threshold) {
-            onOk();
-        } else if (Math.abs(x) > Math.abs(y)) {
-            onDirection(x > 0 ? 'right' : 'left');
-        } else {
-            onDirection(y > 0 ? 'down' : 'up');
-        }
-        setKnobPos({ x: 0, y: 0 });
-        startPos.current = null;
+    // Rotate the shortest way to the new detent (state adjusted during render)
+    if (dial.mode !== mode) {
+        let target = -idx * DETENT;
+        while (target - dial.angle > 180) target -= 360;
+        while (dial.angle - target > 180) target += 360;
+        setDial({ mode, angle: target });
+    }
+
+    const select = (id) => {
+        if (disabled || id === mode) return;
+        tick();
+        onMode(id);
     };
 
     return (
-        <div
-            className="relative w-24 h-24 rounded-full bg-[#181818] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),0_1px_1px_rgba(255,255,255,0.05)] border border-black/50 flex items-center justify-center touch-none select-none"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-        >
-            <div className="absolute inset-2 rounded-full bg-gradient-to-b from-black to-[#222]"></div>
-            <ChevronUp size={12} className="absolute top-1 left-1/2 -translate-x-1/2 text-zinc-600" />
-            <ChevronDown size={12} className="absolute bottom-1 left-1/2 -translate-x-1/2 text-zinc-600" />
-            <ChevronLeft size={12} className="absolute left-1 top-1/2 -translate-y-1/2 text-zinc-600" />
-            <ChevronRight size={12} className="absolute right-1 top-1/2 -translate-y-1/2 text-zinc-600" />
-            <div
-                className="relative z-10 w-10 h-10 rounded-full bg-[#333] border border-zinc-700 shadow-[0_3px_6px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.1)]"
-                style={{ transform: `translate(${knobPos.x}px, ${knobPos.y}px)` }}
-            >
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-zinc-600/20 to-transparent"></div>
+        <div className="flex flex-col items-center gap-2">
+            <div className="relative w-[118px] h-[118px]">
+                {/* index mark on the top plate */}
+                <span className="absolute -top-[9px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-r-[5px] border-t-[7px] border-l-transparent border-r-transparent border-t-rec z-10" />
+
+                {/* drop shadow on the plate */}
+                <div className="absolute inset-1 rounded-full shadow-[0_10px_18px_rgba(0,0,0,0.55),0_2px_3px_rgba(0,0,0,0.6)]" />
+
+                <div
+                    className="absolute inset-0 rounded-full transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                    style={{ transform: `rotate(${dial.angle}deg)` }}
+                >
+                    {/* knurled rim */}
+                    <button
+                        aria-label="Dial de modo"
+                        onClick={() => select(MODES[(idx + 1) % MODES.length].id)}
+                        className="absolute inset-0 rounded-full knurl-black ring-1 ring-black cursor-pointer"
+                    />
+                    {/* face */}
+                    <div className="absolute inset-[8px] rounded-full mat-paint shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-2px_6px_rgba(0,0,0,0.7),0_0_0_1px_#000] pointer-events-none" />
+                    {/* engraved positions */}
+                    {MODES.map((m, i) => (
+                        <button
+                            key={m.id}
+                            onClick={() => select(m.id)}
+                            className="absolute left-1/2 top-1/2 w-10 h-6 -ml-5 -mt-3 flex items-center justify-center"
+                            style={{ transform: `rotate(${i * DETENT}deg) translateY(-37px)` }}
+                        >
+                            <span
+                                className={`text-[10px] font-[800] tracking-[0.08em] transition-colors duration-300 ${
+                                    i === idx ? 'text-osd' : 'text-white/35 hover:text-white/70'
+                                }`}
+                                style={{ fontStretch: '110%' }}
+                            >
+                                {m.label}
+                            </span>
+                        </button>
+                    ))}
+                    {/* spun-metal centre cap */}
+                    <div className="absolute inset-[38px] rounded-full mat-spun shadow-[0_2px_4px_rgba(0,0,0,0.6),inset_0_0_0_1px_rgba(0,0,0,0.35)] pointer-events-none" />
+                </div>
             </div>
+            <span className="text-[9px] font-bold tracking-[0.3em] engrave-light" style={{ fontStretch: '115%' }}>
+                MODE
+            </span>
         </div>
     );
 }
 
-export default function GripControls({
-                                         handlePress,
-                                         handleDirection,
-                                         handleOk,
-                                         toggleGallery,
-                                         toggleInfo,
-                                         togglePower,
-                                         toggleSelfie,
-                                         isSelfieMode,
-                                         handleDispBack,
-                                         activeButton,
-                                         view,
-                                         powerOn
-                                     }) {
+// ---------------------------------------------------------------------------
+// Shutter release with the ON/OFF collar around it
+// ---------------------------------------------------------------------------
+
+function ShutterButton({ powerOn, onShutter, onPower, compact = false }) {
+    const [down, setDown] = useState(false);
+    const size = compact ? 'w-[68px] h-[68px]' : 'w-[104px] h-[104px]';
+    const cap = compact ? 'inset-[15px]' : 'inset-[24px]';
+
     return (
-        // CHANGED: py-2 on mobile (was py-4), adjusted height/width behavior
-        <div className="relative w-full md:w-96 bg-[#151515] flex flex-row md:flex-col items-center justify-around md:justify-start p-2 md:py-12 md:px-8 gap-2 md:gap-10 shadow-[-10px_0_20px_rgba(0,0,0,0.5)] z-20 md:border-l border-black shrink-0 h-auto min-h-[140px] md:h-auto">
+        <div className="flex flex-col items-center gap-2">
+            <div className={`relative ${size}`}>
+                {/* ON / OFF engraving on the plate */}
+                {!compact && (
+                    <>
+                        <span className="absolute -top-3 -left-2 text-[9px] font-[800] tracking-[0.15em] engrave-light">OFF</span>
+                        <span className="absolute -top-3 -right-1 text-[9px] font-[800] tracking-[0.15em] engrave-light">ON</span>
+                    </>
+                )}
 
-            <div className="absolute inset-0 texture-leather opacity-80 pointer-events-none md:rounded-r-none"></div>
-            <div className="hidden md:block absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-black/80 to-transparent pointer-events-none"></div>
-
-            {/* Top Dial (Desktop Only) */}
-            <div className="hidden md:flex flex-col items-center w-full relative z-10 mb-2">
-                <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-[#2a2a2a] to-[#111] shadow-[0_5px_10px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.1)] border border-[#000] flex items-center justify-center transform hover:rotate-12 transition-transform cursor-pointer">
-                    <div className="absolute inset-0 rounded-full opacity-30" style={{ background: 'conic-gradient(from 0deg, transparent 0deg 2deg, black 2deg 4deg) repeating-conic-gradient(from 0deg, transparent 0deg 2deg, black 2deg 4deg)' }}></div>
-                    <div className="w-20 h-20 rounded-full bg-[#1a1a1a] shadow-[0_-1px_1px_rgba(255,255,255,0.1),inset_0_2px_5px_rgba(0,0,0,0.8)] flex items-center justify-center">
-                        <div className="w-1 h-8 bg-red-600 rounded-full shadow-[0_0_5px_rgba(220,38,38,0.5)]"></div>
-                    </div>
-                </div>
-                <span className="mt-3 text-[10px] font-sans font-bold text-zinc-600 tracking-widest uppercase text-shadow-sm">Multi-Function</span>
-            </div>
-
-            {/* D-PAD: Mobile = Virtual Joystick, Desktop = Physical D-Pad */}
-            <div className="relative z-10 flex flex-col items-center pl-1 md:pl-0">
-                {/* Mobile Joystick */}
-                <div className="md:hidden">
-                    <VirtualJoystick
-                        onDirection={(dir) => { handlePress(dir); handleDirection(dir); }}
-                        onOk={() => handlePress('ok', handleOk)}
+                {/* collar (rotates with the lever) */}
+                <button
+                    aria-label={powerOn ? 'Apagar' : 'Encender'}
+                    onClick={() => {
+                        tick();
+                        onPower();
+                    }}
+                    className="absolute inset-0 rounded-full transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                    style={{ transform: `rotate(${powerOn ? 32 : -32}deg)` }}
+                >
+                    <span className="absolute inset-0 rounded-full knurl-silver ring-1 ring-black/60 shadow-[0_6px_12px_rgba(0,0,0,0.5)]" />
+                    <span className="absolute inset-[4px] rounded-full mat-spun" />
+                    {/* lever tab */}
+                    <span
+                        className={`absolute left-1/2 -translate-x-1/2 ${compact ? '-top-[7px] w-4 h-3' : '-top-[10px] w-6 h-4'} rounded-t-[5px] rounded-b-[2px] mat-silver ring-1 ring-black/40 shadow-[0_2px_3px_rgba(0,0,0,0.5)]`}
                     />
-                </div>
+                    {/* power index dot on the collar */}
+                    <span className={`absolute left-1/2 -translate-x-1/2 ${compact ? 'top-[5px]' : 'top-[7px]'} w-[5px] h-[5px] rounded-full ${powerOn ? 'bg-rec' : 'bg-zinc-600'}`} />
+                </button>
 
-                {/* Desktop D-Pad */}
-                <div className="hidden md:flex relative w-44 h-44 rounded-full bg-[#181818] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),0_1px_1px_rgba(255,255,255,0.05)] items-center justify-center p-1 border border-black/50">
-                    <div className="absolute inset-2 rounded-full bg-gradient-to-b from-black to-[#222] shadow-inner"></div>
+                {/* release button */}
+                <button
+                    aria-label="Disparador"
+                    onPointerDown={() => setDown(true)}
+                    onPointerUp={() => setDown(false)}
+                    onPointerLeave={() => setDown(false)}
+                    onClick={onShutter}
+                    className={`absolute ${cap} rounded-full transition-transform duration-75 ${down ? 'scale-[0.94] translate-y-[1px]' : ''}`}
+                >
+                    <span className="absolute inset-0 rounded-full bg-[#0c0c0c] shadow-[0_0_0_1px_rgba(0,0,0,0.9),0_3px_6px_rgba(0,0,0,0.6)]" />
+                    <span className="absolute inset-[3px] rounded-full mat-spun" />
+                    <span
+                        className={`absolute inset-[3px] rounded-full transition-opacity duration-75 ${down ? 'opacity-100' : 'opacity-0'} shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)]`}
+                    />
+                    {/* threaded cable-release socket */}
+                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[28%] h-[28%] rounded-full bg-[radial-gradient(circle,#111_35%,#555_40%,#222_55%,#777_70%,#333)]" />
+                </button>
+            </div>
+            {!compact && (
+                <span className="text-[9px] font-bold tracking-[0.3em] engrave-light" style={{ fontStretch: '115%' }}>
+                    SHUTTER
+                </span>
+            )}
+        </div>
+    );
+}
 
-                    <button onClick={() => { handlePress('up'); handleDirection('up'); }}
-                            className={`absolute top-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'up' ? 'text-green-500 scale-95' : ''}`}><ChevronUp size={32} /></button>
-                    <button onClick={() => { handlePress('down'); handleDirection('down'); }}
-                            className={`absolute bottom-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'down' ? 'text-green-500 scale-95' : ''}`}><ChevronDown size={32} /></button>
-                    <button onClick={() => { handlePress('left'); handleDirection('left'); }}
-                            className={`absolute left-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'left' ? 'text-green-500 scale-95' : ''}`}><ChevronLeft size={32} /></button>
-                    <button onClick={() => { handlePress('right'); handleDirection('right'); }}
-                            className={`absolute right-3 p-2 text-zinc-500 hover:text-white transition-colors active:scale-95 active:text-green-500 ${activeButton === 'right' ? 'text-green-500 scale-95' : ''}`}><ChevronRight size={32} /></button>
+// ---------------------------------------------------------------------------
+// 4-way selector (desktop) and focus lever (touch)
+// ---------------------------------------------------------------------------
 
-                    <button onClick={() => { handlePress('ok', handleOk); }}
-                            className={`
-                       relative w-20 h-20 rounded-full bg-[#222]
-                       shadow-[0_3px_5px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)]
-                       border border-black flex items-center justify-center text-sm font-bold text-zinc-300 tracking-wider
-                       transition-all active:shadow-[inset_0_2px_5px_rgba(0,0,0,0.8)] active:translate-y-[1px]
-                       ${activeButton === 'ok' ? 'bg-black text-green-500 shadow-inner' : 'hover:bg-[#2a2a2a]'}
-                     `}
+const WEDGES = [
+    { dir: 'up', clip: 'polygon(50% 50%, 0 0, 100% 0)', arrow: 'top-2.5 left-1/2 -translate-x-1/2 rotate-0', lever: 'top-1.5 left-1/2 -translate-x-1/2 rotate-0' },
+    { dir: 'right', clip: 'polygon(50% 50%, 100% 0, 100% 100%)', arrow: 'right-2.5 top-1/2 -translate-y-1/2 rotate-90', lever: 'right-1.5 top-1/2 -translate-y-1/2 rotate-90' },
+    { dir: 'down', clip: 'polygon(50% 50%, 100% 100%, 0 100%)', arrow: 'bottom-2.5 left-1/2 -translate-x-1/2 rotate-180', lever: 'bottom-1.5 left-1/2 -translate-x-1/2 rotate-180' },
+    { dir: 'left', clip: 'polygon(50% 50%, 0 100%, 0 0)', arrow: 'left-2.5 top-1/2 -translate-y-1/2 -rotate-90', lever: 'left-1.5 top-1/2 -translate-y-1/2 -rotate-90' },
+];
+
+function SelectorPad({ onDirection, onOk, activeButton }) {
+    const tilt = { up: 'rotateX(6deg)', down: 'rotateX(-6deg)', left: 'rotateY(-6deg)', right: 'rotateY(6deg)' }[activeButton] || 'none';
+    return (
+        <div className="relative w-[164px] h-[164px] [perspective:400px]">
+            {/* recess in the body */}
+            <div className="absolute -inset-1.5 rounded-full bg-black/70 shadow-[inset_0_2px_6px_rgba(0,0,0,0.9),0_1px_0_rgba(255,255,255,0.05)]" />
+            <div
+                className="absolute inset-0 rounded-full mat-paint shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_3px_8px_rgba(0,0,0,0.7)] transition-transform duration-100"
+                style={{ transform: tilt }}
+            >
+                {WEDGES.map(({ dir, clip, arrow }) => (
+                    <button
+                        key={dir}
+                        aria-label={dir}
+                        onClick={() => onDirection(dir)}
+                        className={`absolute inset-0 rounded-full transition-colors ${activeButton === dir ? 'bg-black/40' : 'hover:bg-white/[0.04]'}`}
+                        style={{ clipPath: clip }}
                     >
-                        OK
+                        <span
+                            className={`absolute ${arrow} w-0 h-0 border-l-[5px] border-r-[5px] border-b-[7px] border-l-transparent border-r-transparent transition-colors ${
+                                activeButton === dir ? 'border-b-fuji' : 'border-b-white/40'
+                            }`}
+                        />
                     </button>
-                </div>
+                ))}
+            </div>
+            {/* centre OK */}
+            <button
+                onClick={onOk}
+                aria-label="OK"
+                className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[66px] h-[66px] rounded-full flex flex-col items-center justify-center leading-none transition-[transform,box-shadow] duration-100
+                    bg-[radial-gradient(circle_at_50%_30%,#383838,#1a1a1a_60%,#0f0f0f)]
+                    ${activeButton === 'ok'
+                        ? 'scale-[0.97] shadow-[0_0_0_2px_#060606,inset_0_2px_6px_rgba(0,0,0,0.9)]'
+                        : 'shadow-[0_0_0_2px_#060606,0_4px_8px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.14)] hover:brightness-110'
+                    }`}
+            >
+                <span className="text-[8px] font-bold tracking-[0.2em] text-white/40">MENU</span>
+                <span className={`mt-0.5 text-sm font-[800] tracking-[0.1em] ${activeButton === 'ok' ? 'text-fuji' : 'text-white/80'}`}>OK</span>
+            </button>
+        </div>
+    );
+}
+
+function FocusLever({ onDirection, onOk }) {
+    const [knob, setKnob] = useState({ x: 0, y: 0 });
+    const start = useRef(null);
+    const MAX = 22;
+    const THRESHOLD = 10;
+
+    const onStart = (e) => {
+        e.preventDefault();
+        const t = e.touches[0];
+        start.current = { x: t.clientX, y: t.clientY };
+    };
+    const onMove = (e) => {
+        e.preventDefault();
+        if (!start.current) return;
+        const t = e.touches[0];
+        const dx = t.clientX - start.current.x;
+        const dy = t.clientY - start.current.y;
+        const d = Math.hypot(dx, dy);
+        const s = d > MAX ? MAX / d : 1;
+        setKnob({ x: dx * s, y: dy * s });
+    };
+    const onEnd = (e) => {
+        e.preventDefault();
+        const { x, y } = knob;
+        if (Math.abs(x) < THRESHOLD && Math.abs(y) < THRESHOLD) onOk();
+        else if (Math.abs(x) > Math.abs(y)) onDirection(x > 0 ? 'right' : 'left');
+        else onDirection(y > 0 ? 'down' : 'up');
+        setKnob({ x: 0, y: 0 });
+        start.current = null;
+    };
+
+    return (
+        <div
+            className="relative w-[88px] h-[88px] rounded-full bg-black/70 shadow-[inset_0_2px_6px_rgba(0,0,0,0.9),0_1px_0_rgba(255,255,255,0.05)] flex items-center justify-center touch-none select-none"
+            onTouchStart={onStart}
+            onTouchMove={onMove}
+            onTouchEnd={onEnd}
+        >
+            {WEDGES.map(({ dir, lever }) => (
+                <span
+                    key={dir}
+                    className={`absolute ${lever} w-0 h-0 border-l-[4px] border-r-[4px] border-b-[5px] border-l-transparent border-r-transparent border-b-white/30`}
+                />
+            ))}
+            <div
+                className="relative w-11 h-11 rounded-full shadow-[0_4px_8px_rgba(0,0,0,0.8),0_0_0_1px_#000] transition-transform duration-75"
+                style={{
+                    transform: `translate(${knob.x}px, ${knob.y}px)`,
+                    background: 'repeating-conic-gradient(from 0deg, #2e2e2e 0deg 6deg, #161616 6deg 12deg)',
+                }}
+            >
+                <span className="absolute inset-[7px] rounded-full bg-[radial-gradient(circle_at_50%_35%,#3a3a3a,#141414)] shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]" />
+                <span className="absolute inset-0 m-auto w-4 h-4 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.08)_1px,transparent_1.5px)] [background-size:4px_4px]" />
+            </div>
+            <span className="absolute -bottom-4 text-[8px] font-bold tracking-[0.25em] engrave-dark">OK</span>
+        </div>
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Grip
+// ---------------------------------------------------------------------------
+
+export default function GripControls({
+    handlePress,
+    handleDirection,
+    handleOk,
+    toggleGallery,
+    toggleInfo,
+    togglePower,
+    toggleSelfie,
+    handleShutter,
+    setMode,
+    mode,
+    isSelfieMode,
+    handleDispBack,
+    activeButton,
+    view,
+    powerOn,
+}) {
+    const direction = (dir) => handlePress(dir, () => handleDirection(dir));
+    const ok = () => handlePress('ok', handleOk);
+
+    const buttons = [
+        {
+            name: 'back',
+            label: view === 'viewfinder' && !isSelfieMode ? 'Disp' : 'Back',
+            icon: view === 'viewfinder' && !isSelfieMode ? Info : CornerUpLeft,
+            onClick: () => handlePress('back', handleDispBack),
+            active: view !== 'viewfinder' || isSelfieMode,
+        },
+        { name: 'gallery', label: 'Play', icon: Play, onClick: () => handlePress('gallery', toggleGallery), active: view === 'gallery' || view === 'detail' },
+        { name: 'selfie', label: 'Selfie', icon: Camera, onClick: () => handlePress('selfie', toggleSelfie), active: isSelfieMode },
+        { name: 'info', label: 'Info', icon: User, onClick: () => handlePress('info', toggleInfo), active: view === 'info' },
+    ];
+
+    return (
+        <div className="relative shrink-0 z-20 w-full md:w-[20rem] lg:w-[21rem] md:h-full flex flex-col">
+            {/* ---------------- TOP-PLATE SHOULDER (desktop) ---------------- */}
+            <div className="hidden md:flex relative mat-silver items-center justify-around px-5 pt-8 pb-5 [@media(max-height:800px)]:pt-6 [@media(max-height:800px)]:pb-3 shadow-[inset_0_-1px_0_rgba(0,0,0,0.35),inset_1px_0_0_rgba(255,255,255,0.4)]">
+                <ModeDial mode={mode} onMode={setMode} disabled={!powerOn} />
+                <ShutterButton powerOn={powerOn} onShutter={handleShutter} onPower={togglePower} />
+                {/* chamfer into the leather */}
+                <div className="absolute inset-x-0 -bottom-[6px] h-[6px] bg-gradient-to-b from-[#6f6e69] to-[#2a2a2a]" />
             </div>
 
-            {/* BUTTONS */}
-            <div className="grid grid-cols-5 md:grid-cols-2 gap-x-1 gap-y-2 md:gap-8 relative z-10 md:w-full px-1 justify-items-center">
-                <RoundButton
-                    name="info"
-                    label="Back"
-                    icon={view === 'viewfinder' && !isSelfieMode ? Info : CornerUpLeft}
-                    onClick={() => handlePress('info', handleDispBack)}
-                    active={view !== 'viewfinder' || isSelfieMode}
-                    activeButton={activeButton}
-                />
-                <RoundButton
-                    name="gallery"
-                    label="Play"
-                    icon={Play}
-                    onClick={() => handlePress('gallery', toggleGallery)}
-                    active={view === 'gallery' || view === 'detail'}
-                    activeButton={activeButton}
-                />
-                <RoundButton
-                    name="selfie"
-                    label="Selfie"
-                    icon={Camera}
-                    onClick={() => handlePress('selfie', toggleSelfie)}
-                    active={isSelfieMode}
-                    activeButton={activeButton}
-                />
-                <RoundButton
-                    name="settings"
-                    label="Info"
-                    icon={Settings}
-                    onClick={() => handlePress('settings', toggleInfo)}
-                    active={view === 'info'}
-                    activeButton={activeButton}
-                />
-                <RoundButton
-                    name="power"
-                    label="Pwr"
-                    icon={Power}
-                    danger={true}
-                    onClick={togglePower}
-                    active={powerOn}
-                    activeButton={activeButton}
-                />
-            </div>
-
-            <div className="hidden md:block absolute bottom-6 text-center z-10 opacity-30">
-                <div className="flex gap-1 justify-center mb-1">
-                    <div className="w-1 h-1 bg-white rounded-full"></div>
-                    <div className="w-1 h-1 bg-white rounded-full"></div>
-                    <div className="w-1 h-1 bg-white rounded-full"></div>
+            {/* ---------------- REAR / LEATHER ---------------- */}
+            <div className="relative flex-1 mat-leather flex flex-row md:flex-col items-center justify-between md:justify-start gap-3 md:gap-9 [@media(min-width:768px)_and_(max-height:800px)]:gap-5 px-4 py-4 md:px-8 md:pt-10 [@media(min-width:768px)_and_(max-height:800px)]:pt-6 md:pb-6 border-t border-black md:border-t-0 md:border-l md:border-l-black/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:shadow-[inset_12px_0_18px_-10px_rgba(0,0,0,0.9)] pb-[max(1rem,env(safe-area-inset-bottom))]">
+                {/* Selector */}
+                <div className="md:hidden">
+                    <FocusLever onDirection={direction} onOk={ok} />
                 </div>
-                <span className="text-[10px] font-sans font-bold tracking-[0.2em] text-white">PRO-LINE</span>
+                <div className="hidden md:block">
+                    <SelectorPad onDirection={direction} onOk={ok} activeButton={activeButton} />
+                </div>
+
+                {/* Buttons */}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 md:gap-x-10 md:gap-y-5 [@media(min-width:768px)_and_(max-height:800px)]:gap-y-3">
+                    {buttons.map((b) => (
+                        <RoundButton key={b.name} {...b} activeButton={activeButton} />
+                    ))}
+                </div>
+
+                {/* Shutter on touch layouts */}
+                <div className="md:hidden flex flex-col items-center gap-3 pt-2">
+                    <ShutterButton compact powerOn={powerOn} onShutter={handleShutter} onPower={togglePower} />
+                    <span className="text-[8px] font-bold tracking-[0.25em] engrave-dark">{powerOn ? 'ON' : 'OFF'}</span>
+                </div>
+
+                {/* Badge */}
+                <div className="hidden md:flex [@media(max-height:800px)]:!hidden mt-auto flex-col items-center gap-1.5">
+                    <div className="flex items-center gap-2">
+                        <span className="w-[5px] h-[5px] bg-rec" />
+                        <span className="text-[11px] font-[800] tracking-[0.45em] engrave-dark" style={{ fontStretch: '125%' }}>
+                            X-DIR
+                        </span>
+                    </div>
+                    <span className="text-[8px] tracking-[0.35em] engrave-dark opacity-70">DIRECTOR SERIES</span>
+                </div>
             </div>
         </div>
     );

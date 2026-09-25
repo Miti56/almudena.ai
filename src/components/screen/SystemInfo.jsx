@@ -1,149 +1,194 @@
 import React from 'react';
-import { User, Download, Instagram, Linkedin, Clapperboard, FileText, ExternalLink, Aperture, MapPin } from 'lucide-react';
+import { User, Clapperboard, SlidersHorizontal, AtSign, MapPin, FileDown, ArrowUpRight, Instagram, Linkedin, Globe, Film, CornerUpLeft } from 'lucide-react';
 import { SKILLS, EXPERIENCE } from '../../data/cameraData';
+import { INFO_TAB_COUNT } from '../../lib/camera';
 
-export default function SystemInfo({ handleBack, isVisible }) {
-    const PROFILE = {
-        name: "ALMUDENA MIRONES RIOTTE",
-        role: "Meritoria de Dirección",
-        location: "Madrid",
-        bio: "Hola :)",
-        socials: {
-            instagram: "https://www.instagram.com/_almuu._/",
-            linkedin: "https://www.linkedin.com/in/almudena-mirones-riotte/",
-            imdb: "https://www.imdb.com/fr/name/nm17673372/",
-            website: "https://almudena.art"
-        }
-    };
+const PROFILE = {
+    name: 'Almudena Mirones Riotte',
+    role: 'Meritoria de Dirección',
+    location: 'Madrid',
+    bio: 'Hola :)',
+    cv: '/cv/CV_ALMUDENA_MIRONES_RIOTTE.pdf',
+    socials: [
+        { label: 'Instagram', handle: '@_almuu._', href: 'https://www.instagram.com/_almuu._/', icon: Instagram },
+        { label: 'LinkedIn', handle: 'almudena-mirones-riotte', href: 'https://www.linkedin.com/in/almudena-mirones-riotte/', icon: Linkedin },
+        { label: 'IMDb', handle: 'nm17673372', href: 'https://www.imdb.com/fr/name/nm17673372/', icon: Film },
+        { label: 'Web', handle: 'almudena.art', href: 'https://almudena.art', icon: Globe },
+    ],
+};
 
+const TABS = [
+    { id: 'profile', label: 'Perfil', icon: User },
+    { id: 'log', label: 'Experiencia', icon: Clapperboard },
+    { id: 'skills', label: 'Habilidades', icon: SlidersHorizontal },
+    { id: 'contact', label: 'Contacto', icon: AtSign },
+];
+
+function Row({ children, className = '', ...props }) {
     return (
-        <div className={`absolute inset-0 bg-[#0d0d0d] z-40 transition-transform duration-300 flex flex-col ${isVisible ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div
+            className={`group flex items-center gap-4 px-3 md:px-4 py-3 border-b border-white/[0.07] hover:bg-osd hover:text-black transition-colors duration-150 ${className}`}
+            {...props}
+        >
+            {children}
+        </div>
+    );
+}
 
-            {/* Header */}
-            <div className="bg-[#1a1a1a] p-2 md:p-3 border-b border-white/10 flex justify-between items-center shadow-lg shrink-0">
-                <div className="flex items-center gap-2">
-                    <div className="bg-green-500/20 p-1 rounded">
-                        <User size={14} className="text-green-500" />
-                    </div>
-                    <span className="text-white/90 font-camera text-xs md:text-sm tracking-widest">OPERATOR PROFILE</span>
+function Profile() {
+    return (
+        <div className="grid md:grid-cols-[minmax(0,220px)_1fr] gap-5 md:gap-8 p-4 md:p-6">
+            <div className="relative w-28 md:w-full aspect-[3/4] rounded-[3px] overflow-hidden ring-1 ring-white/10 group animate-[pop_0.6s_cubic-bezier(0.16,1,0.3,1)_both]">
+                <img src="/images/almuPerfil.webp" alt={PROFILE.name} className="absolute inset-0 w-full h-full object-cover grayscale contrast-110 group-hover:grayscale-0 transition-[filter] duration-700" />
+                <div className="absolute inset-x-0 bottom-0 p-2 flex justify-between font-mono text-[9px] text-osd bg-gradient-to-t from-black/80 to-transparent">
+                    <span>ACROS</span>
+                    <span>F1.4 · 1/125</span>
                 </div>
-                <button onClick={handleBack} className="bg-zinc-800 border border-white/10 px-2 py-1 rounded text-[10px] text-white">BACK</button>
             </div>
-
-            {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-8 font-camera custom-scrollbar">
-                <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8">
-
-                    {/* --- MOBILE COMPACT HEADER --- */}
-                    <div className="md:hidden flex gap-4 items-center mb-2">
-                        {/* Small Avatar for Mobile */}
-                        <div className="w-20 h-20 shrink-0 bg-zinc-900 rounded border border-white/10 overflow-hidden relative">
-                            <img src="/images/almuPerfil.webp" className="w-full h-full object-cover grayscale" alt="Profile" />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-white leading-tight">{PROFILE.name}</h1>
-                            <div className="text-[10px] text-green-500 tracking-widest mt-1">{PROFILE.role}</div>
-                            <div className="text-[10px] text-zinc-500 flex items-center gap-1 mt-1"><MapPin size={10}/> {PROFILE.location}</div>
-                        </div>
-                    </div>
-
-                    {/* --- LEFT COLUMN (Desktop only for big image, Mobile for Buttons) --- */}
-                    <div className="md:col-span-4 flex flex-col gap-4">
-
-                        {/* Big Image - HIDDEN ON MOBILE */}
-                        <div className="hidden md:block relative aspect-[3/4] w-full bg-zinc-900 rounded-sm border border-white/10 overflow-hidden group">
-                            <img src="/images/almuPerfil.webp" alt="Profile" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all grayscale" />
-                            <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
-                                <div className="text-[10px] text-green-500 font-mono">ISO 800</div>
-                            </div>
-                        </div>
-
-                        {/* Socials - Condensed on Mobile */}
-                        <div className="grid grid-cols-4 md:grid-cols-2 gap-2">
-                            <SocialButton icon={Instagram} href={PROFILE.socials.instagram} />
-                            <SocialButton icon={Linkedin} href={PROFILE.socials.linkedin} />
-                            <SocialButton icon={Clapperboard} href={PROFILE.socials.imdb} />
-                            <SocialButton icon={ExternalLink} href="#" />
-                        </div>
-
-                        <a
-                            href="/cv/CV_ALMUDENA_MIRONES_RIOTTE.pdf"
-                            download
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full bg-white/5 hover:bg-green-500/20 border border-white/10 text-white p-3 flex items-center justify-center gap-2 group"
-                        >
-                            <FileText size={16} className="text-green-500" />
-                            <span className="text-xs font-bold tracking-widest">DESCARGAR CV</span>
-                        </a>
-
-                    </div>
-
-                    {/* --- RIGHT COLUMN --- */}
-                    <div className="md:col-span-8 flex flex-col gap-6">
-
-                        {/* Name Block - HIDDEN ON MOBILE (Shown in compact header instead) */}
-                        <div className="hidden md:block border-l-2 border-green-500 pl-6 py-2">
-                            <h1 className="text-5xl font-bold text-white mb-2 tracking-tighter">{PROFILE.name}</h1>
-                            <div className="flex items-center gap-4 text-sm text-green-500 font-mono uppercase tracking-widest">
-                                <span>{PROFILE.role}</span>
-                                <span className="flex items-center gap-1 text-zinc-400"><MapPin size={12}/> {PROFILE.location}</span>
-                            </div>
-                        </div>
-
-                        {/* Bio Section */}
-                        <div className="bg-white/5 p-4 border border-white/5 relative overflow-hidden">
-                            <p className="text-white/80 text-sm md:text-lg leading-relaxed font-sans relative z-10">{PROFILE.bio}</p>
-                        </div>
-
-                        {/* Skills */}
-                        <div>
-                            <div className="flex items-center justify-between border-b border-white/10 mb-2 pb-1">
-                                <h3 className="text-xs text-white/50 uppercase tracking-widest">Skills</h3>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {SKILLS.map((skill, index) => (
-                                    <span key={index} className="px-2 py-0.5 bg-zinc-900 border border-zinc-700 text-zinc-300 text-[10px] md:text-xs">
-                                        {skill}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Experience */}
-                        <div className="pb-10 md:pb-0"> {/* Extra padding for mobile bottom */}
-                            <div className="flex items-center justify-between border-b border-white/10 mb-2 pb-1">
-                                <h3 className="text-xs text-white/50 uppercase tracking-widest">Log</h3>
-                            </div>
-                            <div className="space-y-0">
-                                {EXPERIENCE.map((exp, i) => (
-                                    <div key={i} className="flex flex-row items-center justify-between py-2 border-b border-white/5">
-                                        <div className="flex flex-col">
-                                            <span className="text-white font-bold text-xs">{exp.role}</span>
-                                            <span className="text-zinc-500 text-[10px] uppercase">{exp.company}</span>
-                                        </div>
-                                        <span className="font-mono text-green-500 text-[10px]">{exp.year}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                    </div>
+            <div className="flex flex-col animate-[rise_0.7s_cubic-bezier(0.16,1,0.3,1)_0.08s_both]">
+                <div className="font-mono text-[10px] tracking-[0.25em] text-fuji mb-2">OPERADORA</div>
+                <h1 className="text-3xl md:text-5xl font-[800] uppercase leading-[0.92] text-white" style={{ fontStretch: '115%' }}>
+                    {PROFILE.name}
+                </h1>
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-white/70">
+                    <span className="font-serif italic text-lg text-white/90">{PROFILE.role}</span>
+                    <span className="flex items-center gap-1 font-mono text-[11px] tracking-wider">
+                        <MapPin size={12} /> {PROFILE.location.toUpperCase()}
+                    </span>
                 </div>
+                <p className="mt-5 text-white/85 text-base md:text-lg leading-relaxed max-w-prose">{PROFILE.bio}</p>
+                <a
+                    href={PROFILE.cv}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-6 self-start inline-flex items-center gap-3 h-10 pl-3 pr-4 rounded-full bg-osd text-black text-xs font-bold tracking-[0.15em] uppercase hover:bg-white transition-colors"
+                >
+                    <FileDown size={16} /> Descargar CV
+                </a>
             </div>
         </div>
     );
 }
 
-function SocialButton({ icon: Icon, href }) {
+function Experience() {
     return (
-        <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center p-3 bg-[#151515] border border-white/5 hover:bg-[#222]"
-        >
-            <Icon size={16} className="text-zinc-500 hover:text-white" />
-        </a>
+        <div className="py-1">
+            {EXPERIENCE.map((exp, i) => (
+                <Row key={i} className="animate-[rise_0.5s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ animationDelay: `${i * 45}ms` }}>
+                    <span className="font-mono text-[10px] text-white/35 group-hover:text-black/50 w-5 shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                    <div className="flex-1 min-w-0">
+                        <div className="font-bold text-sm text-white group-hover:text-black">{exp.role}</div>
+                        <div className="text-xs text-white/55 group-hover:text-black/65 truncate">{exp.company}</div>
+                    </div>
+                    <span className="shrink-0 font-mono text-[10px] md:text-[11px] text-fuji group-hover:text-fuji-deep text-right">{exp.year}</span>
+                </Row>
+            ))}
+        </div>
+    );
+}
+
+function Skills() {
+    return (
+        <div className="py-1">
+            {SKILLS.map((skill, i) => (
+                <Row key={skill} className="animate-[rise_0.5s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ animationDelay: `${i * 45}ms` }}>
+                    <span className="font-mono text-[10px] text-white/35 group-hover:text-black/50 w-5">{String(i + 1).padStart(2, '0')}</span>
+                    <span className="flex-1 text-sm font-bold text-white group-hover:text-black">{skill}</span>
+                    <span className="font-mono text-[10px] tracking-[0.2em] text-fuji group-hover:text-fuji-deep">ON</span>
+                </Row>
+            ))}
+        </div>
+    );
+}
+
+function Contact() {
+    return (
+        <div className="py-1">
+            {PROFILE.socials.map(({ label, handle, href, icon: Icon }, i) => (
+                <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="block">
+                    <Row className="animate-[rise_0.5s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ animationDelay: `${i * 45}ms` }}>
+                        <Icon size={16} className="text-white/60 group-hover:text-black shrink-0" />
+                        <span className="w-24 text-sm font-bold text-white group-hover:text-black">{label}</span>
+                        <span className="flex-1 font-mono text-[11px] text-white/55 group-hover:text-black/65 truncate">{handle}</span>
+                        <ArrowUpRight size={16} className="text-white/40 group-hover:text-black shrink-0" />
+                    </Row>
+                </a>
+            ))}
+            <a href={PROFILE.cv} download target="_blank" rel="noopener noreferrer" className="block">
+                <Row>
+                    <FileDown size={16} className="text-fuji group-hover:text-black shrink-0" />
+                    <span className="w-24 text-sm font-bold text-white group-hover:text-black">CV</span>
+                    <span className="flex-1 font-mono text-[11px] text-white/55 group-hover:text-black/65 truncate">PDF</span>
+                    <ArrowUpRight size={16} className="text-white/40 group-hover:text-black shrink-0" />
+                </Row>
+            </a>
+        </div>
+    );
+}
+
+if (TABS.length !== INFO_TAB_COUNT) console.warn('INFO_TAB_COUNT is out of sync with SystemInfo tabs');
+
+export default function SystemInfo({ handleBack, tabIndex, onTab }) {
+    const current = tabIndex;
+    const tab = TABS[current].id;
+
+    return (
+        <div className="absolute inset-0 z-40 flex flex-col bg-[#0b0b0b] text-white animate-[fade_0.3s_ease-out_both]">
+            {/* Menu header */}
+            <div className="shrink-0 h-11 md:h-12 flex items-center justify-between px-3 md:px-4 border-b border-white/10 bg-[#141414]">
+                <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center justify-center h-6 px-2 rounded-[3px] bg-osd text-black text-[10px] font-[800] tracking-[0.15em]">MENU</span>
+                    <span className="font-[800] uppercase tracking-[0.2em] text-sm" style={{ fontStretch: '115%' }}>
+                        {TABS[current].label}
+                    </span>
+                </div>
+                <div className="flex items-center gap-3">
+                    <span className="font-mono text-[10px] text-white/50 tabular">
+                        {current + 1}/{TABS.length}
+                    </span>
+                    <button onClick={handleBack} className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full border border-white/15 text-[10px] font-bold tracking-[0.15em] hover:bg-white/10 transition-colors">
+                        <CornerUpLeft size={12} /> BACK
+                    </button>
+                </div>
+            </div>
+
+            <div className="flex-1 min-h-0 flex flex-col md:flex-row">
+                {/* Tabs: left rail on desktop, top strip on mobile */}
+                <nav className="shrink-0 flex md:flex-col md:w-16 border-b md:border-b-0 md:border-r border-white/10 bg-[#101010]">
+                    {TABS.map(({ id, label, icon: Icon }, i) => {
+                        const active = id === tab;
+                        return (
+                            <button
+                                key={id}
+                                onClick={() => onTab(i)}
+                                aria-label={label}
+                                className={`relative flex-1 md:flex-none h-11 md:h-16 flex items-center justify-center transition-colors ${
+                                    active ? 'bg-osd text-black' : 'text-white/45 hover:text-white hover:bg-white/5'
+                                }`}
+                            >
+                                <Icon size={18} />
+                                {active && <span className="absolute md:hidden bottom-0 inset-x-0 h-[2px] bg-fuji" />}
+                                {active && <span className="hidden md:block absolute right-0 inset-y-0 w-[3px] bg-fuji" />}
+                            </button>
+                        );
+                    })}
+                </nav>
+
+                <div key={tab} className="flex-1 min-h-0 overflow-y-auto scrollbar-thin">
+                    {tab === 'profile' && <Profile />}
+                    {tab === 'log' && <Experience />}
+                    {tab === 'skills' && <Skills />}
+                    {tab === 'contact' && <Contact />}
+                </div>
+            </div>
+
+            {/* Button guide */}
+            <div className="shrink-0 hidden md:flex items-center gap-6 h-9 px-4 border-t border-white/10 bg-[#141414] font-mono text-[10px] tracking-[0.15em] text-white/45">
+                <span><span className="text-white/80">◀ ▶</span> SECCIÓN</span>
+                <span><span className="text-white/80">DISP/BACK</span> SALIR</span>
+                <span className="ml-auto">ALMUDENA · X-DIR</span>
+            </div>
+        </div>
     );
 }

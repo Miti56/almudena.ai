@@ -1,81 +1,135 @@
-import React, { useEffect, useRef } from 'react';
-import { Grid3X3, Grid2X2, ArrowLeft } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Grid3X3, Grid2X2, ArrowLeft, Play } from 'lucide-react';
 import { FILMS } from '../../data/cameraData';
+import { simFor, fileNo } from '../../lib/camera';
 
-export default function Gallery({ galleryFocusIndex, gridMode, toggleGridMode, selectFilm, handleBack }) {
+function Thumb({ film, index, focused, onSelect, onHover }) {
+    const [broken, setBroken] = useState(false);
+    const sim = simFor(film);
 
+    return (
+        <button
+            id={`film-card-${index}`}
+            onClick={() => onSelect(film)}
+            onMouseEnter={onHover}
+            className="group relative text-left outline-none animate-[pop_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
+            style={{ animationDelay: `${80 + index * 55}ms` }}
+        >
+            <div
+                className={`relative aspect-video w-full overflow-hidden rounded-[3px] bg-gradient-to-br ${film.color} transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    focused ? 'scale-[1.03]' : 'group-hover:scale-[1.015]'
+                }`}
+            >
+                {!broken && (
+                    <img
+                        src={film.src}
+                        alt={film.title}
+                        loading="lazy"
+                        draggable={false}
+                        onError={() => setBroken(true)}
+                        className={`absolute inset-0 w-full h-full object-cover transition-[transform,filter] duration-700 ease-out ${
+                            focused ? 'scale-105 brightness-100' : 'brightness-[0.72] group-hover:brightness-90'
+                        }`}
+                    />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-black/30" />
+
+                {/* Playback info, as the camera draws it over each frame */}
+                <div className="absolute inset-0 p-2.5 md:p-3 flex flex-col justify-between osd">
+                    <div className="flex justify-between items-start font-mono text-[9px] md:text-[10px] font-bold">
+                        <span>{fileNo(film)}</span>
+                        <span className="px-1 border border-osd/60 rounded-[2px]">{sim.code}</span>
+                    </div>
+                    <div>
+                        <h3 className="font-[800] uppercase text-sm md:text-base leading-tight line-clamp-2" style={{ fontStretch: '108%' }}>
+                            {film.title}
+                        </h3>
+                        <div className="mt-1 flex items-center gap-2 font-mono text-[9px] md:text-[10px] text-osd/70">
+                            <span>{film.year}</span>
+                            <span>·</span>
+                            <span>{film.runtime}</span>
+                            {film.url && film.url !== 'n/a' && (
+                                <Play size={9} className="ml-auto text-osd" fill="currentColor" />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Focus cursor */}
+            <span
+                className={`pointer-events-none absolute -inset-[5px] rounded-[5px] border-2 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+                    focused ? 'border-fuji opacity-100 scale-100 shadow-[0_0_24px_rgba(47,211,122,0.25)]' : 'border-transparent opacity-0 scale-[0.97]'
+                }`}
+            />
+        </button>
+    );
+}
+
+export default function Gallery({ galleryFocusIndex, gridMode, toggleGridMode, selectFilm, handleBack, onFocusIndex }) {
     const containerRef = useRef(null);
+    const focusedFilm = galleryFocusIndex !== null ? FILMS[galleryFocusIndex] : null;
 
-    // Auto-scroll logic
     useEffect(() => {
-        if (galleryFocusIndex !== null) {
-            const activeElement = document.getElementById(`film-card-${galleryFocusIndex}`);
-            if (activeElement && containerRef.current) {
-                activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-        }
+        if (galleryFocusIndex === null) return;
+        document.getElementById(`film-card-${galleryFocusIndex}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, [galleryFocusIndex]);
 
     return (
-        <div ref={containerRef} className="absolute inset-0 p-4 md:p-10 overflow-y-auto custom-scrollbar touch-pan-y">
-
+        <div className="absolute inset-0 flex flex-col bg-[#0b0b0b]/80 animate-[fade_0.35s_ease-out_both]">
             {/* Header */}
-            <div className="flex items-center justify-between mb-4 md:mb-6 border-b border-white/20 pb-2 md:pb-4 sticky top-0 bg-[#0a0a0a] z-20 pt-2 shadow-lg">
+            <div className="shrink-0 flex items-center justify-between px-3 md:px-6 h-12 md:h-14 border-b border-white/10 bg-black/40 backdrop-blur-md osd">
                 <div className="flex items-center gap-3">
-                    {/* NEW: Back Button */}
-                    <button onClick={handleBack} className="bg-white/10 hover:bg-white/20 p-2 rounded text-white transition-colors border border-white/10">
-                        <ArrowLeft size={16} />
+                    <button onClick={handleBack} aria-label="Volver" className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center hover:bg-white/10 transition-colors">
+                        <ArrowLeft size={15} />
                     </button>
-                    <h2 className="text-white font-camera text-xl md:text-2xl tracking-widest text-shadow-sm">PLAYBACK</h2>
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-[3px] bg-osd text-black">
+                        <Play size={11} fill="currentColor" />
+                    </span>
+                    <h2 className="font-[800] uppercase tracking-[0.2em] text-sm md:text-base" style={{ fontStretch: '115%' }}>
+                        Playback
+                    </h2>
                 </div>
-
                 <div className="flex items-center gap-4">
-                    <span className="text-green-500 font-mono text-[10px] hidden md:block">USE ARROWS + OK</span>
-                    <button onClick={toggleGridMode} className="text-white/50 hover:text-white transition-colors">
-                        {gridMode === 2 ? <Grid2X2 size={20} /> : <Grid3X3 size={20} />}
+                    <span className="hidden md:block font-mono text-[10px] text-osd/50 tracking-[0.2em]">◀ ▲ ▼ ▶ + OK</span>
+                    <span className="font-mono text-xs tabular text-osd/80">
+                        {String((galleryFocusIndex ?? -1) + 1).padStart(2, '0')}/{String(FILMS.length).padStart(2, '0')}
+                    </span>
+                    <button onClick={toggleGridMode} aria-label="Cambiar cuadrícula" className="hidden md:flex text-osd/60 hover:text-osd transition-colors">
+                        {gridMode === 2 ? <Grid2X2 size={18} /> : <Grid3X3 size={18} />}
                     </button>
                 </div>
             </div>
 
             {/* Grid */}
-            <div className={`grid gap-3 md:gap-4 pb-12 ${gridMode === 3 ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
-                {FILMS.map((film, index) => {
-                    // CHANGED: Only highlight if index is not null
-                    const isSelected = galleryFocusIndex === index;
-
-                    return (
-                        <button
+            <div ref={containerRef} className="flex-1 overflow-y-auto scrollbar-thin px-3 md:px-6 py-4 md:py-6 touch-pan-y">
+                <div className={`grid gap-4 md:gap-5 pb-4 ${gridMode === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
+                    {FILMS.map((film, index) => (
+                        <Thumb
                             key={film.id}
-                            id={`film-card-${index}`}
-                            onClick={() => selectFilm(film)}
-                            className={`
-                                group relative aspect-video w-full rounded border bg-zinc-900/80 text-left transition-all overflow-hidden 
-                                ${isSelected ? 'border-green-400 ring-2 ring-green-500/50 scale-[1.02] z-10' : 'border-white/10 hover:border-white/40'}
-                            `}
-                        >
-                            {/*<div className="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-80 transition-opacity" style={{ backgroundImage: `url(${film.src})` }}></div>*/}
-                            <img
-                                src={film.src}
-                                alt={film.title}
-                                loading="lazy"
-                                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
-                            />
+                            film={film}
+                            index={index}
+                            focused={galleryFocusIndex === index}
+                            onSelect={selectFilm}
+                            onHover={() => onFocusIndex(index)}
+                        />
+                    ))}
+                </div>
+            </div>
 
-                            <div className={`absolute inset-0 bg-gradient-to-br ${film.color} opacity-40 mix-blend-multiply`}></div>
-
-                            <div className="absolute inset-0 p-3 md:p-4 flex flex-col justify-between z-10">
-                                <div className="flex justify-between items-start">
-                                    <span className="bg-black/70 px-2 py-0.5 rounded text-[9px] text-white font-mono border border-white/10">{film.role}</span>
-                                </div>
-                                <div>
-                                    <h3 className={`text-white font-bold font-camera text-sm md:text-base text-shadow truncate ${isSelected ? 'text-green-400' : 'group-hover:text-white'}`}>
-                                        {film.title}
-                                    </h3>
-                                </div>
-                            </div>
-                        </button>
-                    );
-                })}
+            {/* Info strip for the focused frame */}
+            <div className="shrink-0 hidden md:flex items-center gap-6 h-10 px-6 border-t border-white/10 bg-black/50 backdrop-blur-md font-mono text-[10px] tracking-[0.12em] osd">
+                {focusedFilm ? (
+                    <>
+                        <span className="text-fuji">● {fileNo(focusedFilm)}</span>
+                        <span className="uppercase">{focusedFilm.project}</span>
+                        <span className="uppercase text-osd/70 truncate">{focusedFilm.director}</span>
+                        <span className="ml-auto">{focusedFilm.res}</span>
+                        <span>{focusedFilm.size}</span>
+                    </>
+                ) : (
+                    <span className="text-osd/50">SELECCIONA UN FOTOGRAMA</span>
+                )}
             </div>
         </div>
     );
