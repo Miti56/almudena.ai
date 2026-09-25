@@ -17,7 +17,7 @@ function Thumb({ film, index, focused, onSelect, onHover }) {
         >
             <div
                 className={`relative aspect-video w-full overflow-hidden rounded-[3px] bg-gradient-to-br ${film.color} transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    focused ? 'scale-[1.03]' : 'group-hover:scale-[1.015]'
+                    focused ? 'md:scale-[1.03]' : 'md:group-hover:scale-[1.015]'
                 }`}
             >
                 {!broken && (
@@ -27,8 +27,8 @@ function Thumb({ film, index, focused, onSelect, onHover }) {
                         loading="lazy"
                         draggable={false}
                         onError={() => setBroken(true)}
-                        className={`absolute inset-0 w-full h-full object-cover transition-[transform,filter] duration-700 ease-out ${
-                            focused ? 'scale-105 brightness-100' : 'brightness-[0.72] group-hover:brightness-90'
+                        className={`absolute inset-0 w-full h-full object-cover transition-[transform,filter] duration-700 ease-out brightness-90 ${
+                            focused ? 'md:scale-105 md:brightness-100' : 'md:brightness-[0.72] md:group-hover:brightness-90'
                         }`}
                     />
                 )}
@@ -56,9 +56,9 @@ function Thumb({ film, index, focused, onSelect, onHover }) {
                 </div>
             </div>
 
-            {/* Focus cursor */}
+            {/* Focus cursor (desktop only: on touch there is nothing to navigate with) */}
             <span
-                className={`pointer-events-none absolute -inset-[5px] rounded-[5px] border-2 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+                className={`hidden md:block pointer-events-none absolute -inset-[5px] rounded-[5px] border-2 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
                     focused ? 'border-fuji opacity-100 scale-100 shadow-[0_0_24px_rgba(47,211,122,0.25)]' : 'border-transparent opacity-0 scale-[0.97]'
                 }`}
             />
@@ -92,7 +92,7 @@ export default function Gallery({ galleryFocusIndex, gridMode, toggleGridMode, s
                 </div>
                 <div className="flex items-center gap-4">
                     <span className="hidden md:block font-mono text-[10px] text-osd/50 tracking-[0.2em]">◀ ▲ ▼ ▶ + OK</span>
-                    <span className="font-mono text-xs tabular text-osd/80">
+                    <span className="hidden md:inline font-mono text-xs tabular text-osd/80">
                         {String((galleryFocusIndex ?? -1) + 1).padStart(2, '0')}/{String(FILMS.length).padStart(2, '0')}
                     </span>
                     <button onClick={toggleGridMode} aria-label="Cambiar cuadrícula" className="hidden md:flex text-osd/60 hover:text-osd transition-colors">

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Play, Info, CornerUpLeft, Camera, User } from 'lucide-react';
 import RoundButton from '../ui/RoundButton';
 import { tick } from '../../lib/sfx';
@@ -151,14 +151,14 @@ function ShutterButton({ powerOn, onShutter, onPower, compact = false }) {
 }
 
 // ---------------------------------------------------------------------------
-// 4-way selector (desktop) and focus lever (touch)
+// 4-way selector (desktop)
 // ---------------------------------------------------------------------------
 
 const WEDGES = [
-    { dir: 'up', clip: 'polygon(50% 50%, 0 0, 100% 0)', arrow: 'top-2.5 left-1/2 -translate-x-1/2 rotate-0', lever: 'top-1.5 left-1/2 -translate-x-1/2 rotate-0' },
-    { dir: 'right', clip: 'polygon(50% 50%, 100% 0, 100% 100%)', arrow: 'right-2.5 top-1/2 -translate-y-1/2 rotate-90', lever: 'right-1.5 top-1/2 -translate-y-1/2 rotate-90' },
-    { dir: 'down', clip: 'polygon(50% 50%, 100% 100%, 0 100%)', arrow: 'bottom-2.5 left-1/2 -translate-x-1/2 rotate-180', lever: 'bottom-1.5 left-1/2 -translate-x-1/2 rotate-180' },
-    { dir: 'left', clip: 'polygon(50% 50%, 0 100%, 0 0)', arrow: 'left-2.5 top-1/2 -translate-y-1/2 -rotate-90', lever: 'left-1.5 top-1/2 -translate-y-1/2 -rotate-90' },
+    { dir: 'up', clip: 'polygon(50% 50%, 0 0, 100% 0)', arrow: 'top-2.5 left-1/2 -translate-x-1/2 rotate-0' },
+    { dir: 'right', clip: 'polygon(50% 50%, 100% 0, 100% 100%)', arrow: 'right-2.5 top-1/2 -translate-y-1/2 rotate-90' },
+    { dir: 'down', clip: 'polygon(50% 50%, 100% 100%, 0 100%)', arrow: 'bottom-2.5 left-1/2 -translate-x-1/2 rotate-180' },
+    { dir: 'left', clip: 'polygon(50% 50%, 0 100%, 0 0)', arrow: 'left-2.5 top-1/2 -translate-y-1/2 -rotate-90' },
 ];
 
 function SelectorPad({ onDirection, onOk, activeButton }) {
@@ -201,65 +201,6 @@ function SelectorPad({ onDirection, onOk, activeButton }) {
                 <span className="text-[8px] font-bold tracking-[0.2em] text-white/40">MENU</span>
                 <span className={`mt-0.5 text-sm font-[800] tracking-[0.1em] ${activeButton === 'ok' ? 'text-fuji' : 'text-white/80'}`}>OK</span>
             </button>
-        </div>
-    );
-}
-
-function FocusLever({ onDirection, onOk }) {
-    const [knob, setKnob] = useState({ x: 0, y: 0 });
-    const start = useRef(null);
-    const MAX = 22;
-    const THRESHOLD = 10;
-
-    const onStart = (e) => {
-        e.preventDefault();
-        const t = e.touches[0];
-        start.current = { x: t.clientX, y: t.clientY };
-    };
-    const onMove = (e) => {
-        e.preventDefault();
-        if (!start.current) return;
-        const t = e.touches[0];
-        const dx = t.clientX - start.current.x;
-        const dy = t.clientY - start.current.y;
-        const d = Math.hypot(dx, dy);
-        const s = d > MAX ? MAX / d : 1;
-        setKnob({ x: dx * s, y: dy * s });
-    };
-    const onEnd = (e) => {
-        e.preventDefault();
-        const { x, y } = knob;
-        if (Math.abs(x) < THRESHOLD && Math.abs(y) < THRESHOLD) onOk();
-        else if (Math.abs(x) > Math.abs(y)) onDirection(x > 0 ? 'right' : 'left');
-        else onDirection(y > 0 ? 'down' : 'up');
-        setKnob({ x: 0, y: 0 });
-        start.current = null;
-    };
-
-    return (
-        <div
-            className="relative w-[88px] h-[88px] rounded-full bg-black/70 shadow-[inset_0_2px_6px_rgba(0,0,0,0.9),0_1px_0_rgba(255,255,255,0.05)] flex items-center justify-center touch-none select-none"
-            onTouchStart={onStart}
-            onTouchMove={onMove}
-            onTouchEnd={onEnd}
-        >
-            {WEDGES.map(({ dir, lever }) => (
-                <span
-                    key={dir}
-                    className={`absolute ${lever} w-0 h-0 border-l-[4px] border-r-[4px] border-b-[5px] border-l-transparent border-r-transparent border-b-white/30`}
-                />
-            ))}
-            <div
-                className="relative w-11 h-11 rounded-full shadow-[0_4px_8px_rgba(0,0,0,0.8),0_0_0_1px_#000] transition-transform duration-75"
-                style={{
-                    transform: `translate(${knob.x}px, ${knob.y}px)`,
-                    background: 'repeating-conic-gradient(from 0deg, #2e2e2e 0deg 6deg, #161616 6deg 12deg)',
-                }}
-            >
-                <span className="absolute inset-[7px] rounded-full bg-[radial-gradient(circle_at_50%_35%,#3a3a3a,#141414)] shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]" />
-                <span className="absolute inset-0 m-auto w-4 h-4 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.08)_1px,transparent_1.5px)] [background-size:4px_4px]" />
-            </div>
-            <span className="absolute -bottom-4 text-[8px] font-bold tracking-[0.25em] engrave-dark">OK</span>
         </div>
     );
 }
@@ -313,16 +254,13 @@ export default function GripControls({
 
             {/* ---------------- REAR / LEATHER ---------------- */}
             <div className="relative flex-1 mat-leather flex flex-row md:flex-col items-center justify-between md:justify-start gap-3 md:gap-9 [@media(min-width:768px)_and_(max-height:800px)]:gap-5 px-4 py-4 md:px-8 md:pt-10 [@media(min-width:768px)_and_(max-height:800px)]:pt-6 md:pb-6 border-t border-black md:border-t-0 md:border-l md:border-l-black/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:shadow-[inset_12px_0_18px_-10px_rgba(0,0,0,0.9)] pb-[max(1rem,env(safe-area-inset-bottom))]">
-                {/* Selector */}
-                <div className="md:hidden">
-                    <FocusLever onDirection={direction} onOk={ok} />
-                </div>
+                {/* Selector (desktop only; touch uses taps and swipes on the screen) */}
                 <div className="hidden md:block">
                     <SelectorPad onDirection={direction} onOk={ok} activeButton={activeButton} />
                 </div>
 
                 {/* Buttons */}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 md:gap-x-10 md:gap-y-5 [@media(min-width:768px)_and_(max-height:800px)]:gap-y-3">
+                <div className="grid grid-cols-4 md:grid-cols-2 gap-x-4 gap-y-2 md:gap-x-10 md:gap-y-5 [@media(min-width:768px)_and_(max-height:800px)]:gap-y-3">
                     {buttons.map((b) => (
                         <RoundButton key={b.name} {...b} activeButton={activeButton} />
                     ))}
