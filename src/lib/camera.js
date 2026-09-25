@@ -22,4 +22,4 @@ export const evFor = (film) => EV[(film.id - 1) % EV.length];
 export const AUTOPLAY_MS = 7000;
 
 // Number of tabs in the INFO menu (SystemInfo), so the D-pad can page through them
-export const INFO_TAB_COUNT = 4;
+export const INFO_TAB_COUNT = 3;

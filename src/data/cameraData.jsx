@@ -127,12 +127,12 @@ export const FILMS = [
     },
 ];
 
-export const SKILLS = [
-    "Cinematografía", "Corrección de Color", "Diseño de Iluminación", "Dirección", "Edición (Premiere/Resolve)"
-];
-
-
 export const EXPERIENCE = [
+    {
+        year: "Jun 2026 – Dic 2026",
+        role: "Meritoria de Dirección",
+        company: "Avante Libre AIE · Serie 'La Náufraga' (Movistar+)",
+    },
     {
         year: "Dic 2025 – May 2026",
         role: "Meritoria de Dirección",
@@ -157,18 +157,6 @@ export const EXPERIENCE = [
         year: "Jul 2024 – Sep 2024",
         role: "Becaria de Dirección",
         company: "Bambú Producciones · Serie diaria 'Valle Salvaje' (RTVE / Netflix)",
-    },
-    {
-        year: "Sep 2023 – Jun 2024",
-        role: "Profesora de Teatro",
-        company:
-            "Liceo Francés de Madrid · Intervención en 2º de primaria con puesta en escena final",
-    },
-    {
-        year: "Sep 2021 – Jun 2022",
-        role: "Profesora de Teatro",
-        company:
-            "Colegio Cardenal Spínola (Madrid) · Actividad extraescolar con niños/as de 4 y 7 años",
     },
 ];
 

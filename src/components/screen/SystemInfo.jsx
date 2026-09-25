@@ -1,6 +1,6 @@
 import React from 'react';
-import { User, Clapperboard, SlidersHorizontal, AtSign, MapPin, FileDown, ArrowUpRight, Instagram, Linkedin, Globe, Film, CornerUpLeft } from 'lucide-react';
-import { SKILLS, EXPERIENCE } from '../../data/cameraData';
+import { User, Clapperboard, AtSign, MapPin, FileDown, ArrowUpRight, Instagram, Linkedin, Globe, Film, CornerUpLeft } from 'lucide-react';
+import { EXPERIENCE } from '../../data/cameraData';
 import { INFO_TAB_COUNT } from '../../lib/camera';
 
 const PROFILE = {
@@ -20,7 +20,6 @@ const PROFILE = {
 const TABS = [
     { id: 'profile', label: 'Perfil', icon: User },
     { id: 'log', label: 'Experiencia', icon: Clapperboard },
-    { id: 'skills', label: 'Habilidades', icon: SlidersHorizontal },
     { id: 'contact', label: 'Contacto', icon: AtSign },
 ];
 
@@ -46,7 +45,6 @@ function Profile() {
                 </div>
             </div>
             <div className="flex flex-col animate-[rise_0.7s_cubic-bezier(0.16,1,0.3,1)_0.08s_both]">
-                <div className="font-mono text-[10px] tracking-[0.25em] text-fuji mb-2">OPERADORA</div>
                 <h1 className="text-3xl md:text-5xl font-[800] uppercase leading-[0.92] text-white" style={{ fontStretch: '115%' }}>
                     {PROFILE.name}
                 </h1>
@@ -82,20 +80,6 @@ function Experience() {
                         <div className="text-xs text-white/55 group-hover:text-black/65 truncate">{exp.company}</div>
                     </div>
                     <span className="shrink-0 font-mono text-[10px] md:text-[11px] text-fuji group-hover:text-fuji-deep text-right">{exp.year}</span>
-                </Row>
-            ))}
-        </div>
-    );
-}
-
-function Skills() {
-    return (
-        <div className="py-1">
-            {SKILLS.map((skill, i) => (
-                <Row key={skill} className="animate-[rise_0.5s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ animationDelay: `${i * 45}ms` }}>
-                    <span className="font-mono text-[10px] text-white/35 group-hover:text-black/50 w-5">{String(i + 1).padStart(2, '0')}</span>
-                    <span className="flex-1 text-sm font-bold text-white group-hover:text-black">{skill}</span>
-                    <span className="font-mono text-[10px] tracking-[0.2em] text-fuji group-hover:text-fuji-deep">ON</span>
                 </Row>
             ))}
         </div>
@@ -178,7 +162,6 @@ export default function SystemInfo({ handleBack, tabIndex, onTab }) {
                 <div key={tab} className="flex-1 min-h-0 overflow-y-auto scrollbar-thin">
                     {tab === 'profile' && <Profile />}
                     {tab === 'log' && <Experience />}
-                    {tab === 'skills' && <Skills />}
                     {tab === 'contact' && <Contact />}
                 </div>
             </div>
