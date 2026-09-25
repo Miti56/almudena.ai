@@ -70,8 +70,9 @@ export default function Gallery({ galleryFocusIndex, gridMode, toggleGridMode, s
     const containerRef = useRef(null);
     const focusedFilm = galleryFocusIndex !== null ? FILMS[galleryFocusIndex] : null;
 
+    // Follow the D-pad/keyboard focus on desktop. On phones there is no visible focus, so the grid opens at the top.
     useEffect(() => {
-        if (galleryFocusIndex === null) return;
+        if (galleryFocusIndex === null || !window.matchMedia('(min-width: 768px)').matches) return;
         document.getElementById(`film-card-${galleryFocusIndex}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, [galleryFocusIndex]);
 
