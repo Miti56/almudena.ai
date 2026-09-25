@@ -30,6 +30,7 @@ The UI is a Fujifilm X-series style camera seen from the back: a silver top plat
 **All app state lives in `src/App.jsx`**, with no router and no context. It holds:
 - `view`: `'viewfinder' | 'gallery' | 'detail' | 'info'`. The mode dial position is derived from `view` plus `isSelfieMode`; `setMode()` jumps straight to a mode.
 - `liveIndex`: the film shown in live view. `LiveView` auto-advances it, D-pad left/right changes it, and OK or a tap on the screen opens it.
+- `detailFrom`: whether the open film came from live view or the gallery. Closing the film (X, DISP/BACK, Esc) returns there, and the mode dial follows it.
 - `shutterTick`: incremented on every shutter press. `Iris` snaps shut on each change, `MonitorBody` grabs a selfie frame while the iris is shut, and the access lamp blinks. From playback or menus, the shutter returns to live view, like a half-press on a real camera.
 - power and boot state. `BOOT_MS` sets the splash length; the iris opens when `powerOn && !bootSequence`.
 - selfie mode. Leaving it must go through `stopSelfieMode()` so the webcam tracks stop.

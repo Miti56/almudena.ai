@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import useHistogram from '../../lib/useHistogram';
 import { simFor, evFor, fileNo, AUTOPLAY_MS } from '../../lib/camera';
 import { afBeep } from '../../lib/sfx';
@@ -283,15 +283,6 @@ export default function Viewfinder({ film, index, total, isSelfie, videoRef, fra
                                 <span className="uppercase tracking-wide">{film.role}</span>
                             </p>
                             <div className="mt-3 md:mt-4 flex items-center gap-2 md:gap-3 animate-[rise_0.7s_cubic-bezier(0.16,1,0.3,1)_0.26s_both]">
-                                <button
-                                    onClick={onOpen}
-                                    className="pointer-events-auto group inline-flex items-center gap-2 h-8 md:h-9 pl-2.5 pr-3.5 rounded-full bg-osd text-black text-[10px] md:text-xs font-bold tracking-[0.15em] uppercase shadow-[0_4px_18px_rgba(0,0,0,0.45)] hover:bg-white transition-colors"
-                                >
-                                    <span className="w-5 h-5 rounded-full bg-black text-osd flex items-center justify-center transition-transform group-hover:scale-110">
-                                        <Play size={10} fill="currentColor" />
-                                    </span>
-                                    Ver película
-                                </button>
                                 <button onClick={onPrev} aria-label="Anterior" className="pointer-events-auto w-8 h-8 md:w-9 md:h-9 rounded-full border border-osd/40 flex items-center justify-center hover:bg-white/10 transition-colors">
                                     <ChevronLeft size={16} />
                                 </button>

@@ -36,6 +36,7 @@ function TopPlate() {
 export default function CameraPortfolio() {
     const [view, setView] = useState('viewfinder');
     const [selectedFilm, setSelectedFilm] = useState(null);
+    const [detailFrom, setDetailFrom] = useState('viewfinder'); // where a film was opened from, so closing returns there
     const [activeButton, setActiveButton] = useState(null);
     const [bootSequence, setBootSequence] = useState(true);
     const [powerOn, setPowerOn] = useState(true);
@@ -81,11 +82,12 @@ export default function CameraPortfolio() {
     const nextLive = useCallback(() => setLiveIndex((i) => (i + 1) % FILMS.length), []);
     const prevLive = useCallback(() => setLiveIndex((i) => (i - 1 + FILMS.length) % FILMS.length), []);
 
-    const openFilm = (film) => {
+    const openFilm = (film, from = 'gallery') => {
         setSelectedFilm(film);
+        setDetailFrom(from);
         setView('detail');
     };
-    const openLive = () => openFilm(FILMS[liveIndex]);
+    const openLive = () => openFilm(FILMS[liveIndex], 'viewfinder');
 
     const togglePower = () => {
         if (!powerOn) {
@@ -149,9 +151,15 @@ export default function CameraPortfolio() {
     };
 
     // Mode dial: jump straight to a mode
-    const mode = isSelfieMode ? 'selfie' : view === 'gallery' || view === 'detail' ? 'play' : view === 'info' ? 'info' : 'live';
+    const mode = isSelfieMode
+        ? 'selfie'
+        : view === 'gallery' || (view === 'detail' && detailFrom === 'gallery')
+          ? 'play'
+          : view === 'info'
+            ? 'info'
+            : 'live';
     const setMode = (next) => {
-        if (!powerOn || next === mode) return;
+        if (!powerOn || (next === mode && view !== 'detail')) return;
         if (next === 'selfie') {
             startSelfie();
             return;
@@ -173,7 +181,7 @@ export default function CameraPortfolio() {
             return;
         }
         if (view === 'detail') {
-            setView('gallery');
+            setView(detailFrom);
             setSelectedFilm(null);
         } else if (view !== 'viewfinder') {
             setView('viewfinder');
